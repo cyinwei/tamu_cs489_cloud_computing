@@ -1,0 +1,10 @@
+# python
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# vs code
+.vscode
+
+# OSX file systems
+.DS_Store
