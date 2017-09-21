@@ -1,100 +1,82 @@
 """
-config_io.py
-
-This module handles the I/O of the aggiestack CLI.  It reads files given by the
-CLI, parses it, and stores it in a JSON state file.
-
-In this implementation of aggiestack, the CLI loads a set of state files in
-order to store its configuration settings.  The state files are JSON files which
-correspond to the *machines*, *images*, and *flavors* managed by the CLI.  This
-way, aggiestack will remember the configuration settings after the initial
-setup.
-
-The  default 
+Handles the configuration I/O (aggiestack config --?) logic.
 """
+from aggiestack.utils.config_settings import (HARDWARE_KEYS, IMAGE_KEYS,
+                                              FLAVOR_KEYS, HARDWARE_FILE,
+                                              IMAGE_FILE, FLAVOR_FILE)
+from aggiestack.utils.io_helpers import (read_config_file, write_state,
+                                         load_state)
+from aggiestack.utils.check_config_inputs import (check_hardware_config_file,
+                                                  check_image_config_file,
+                                                  check_flavor_config_file)
 
-import os
-import ipaddress
-import json
+def read_hardware_config_file(input_file):
+    """
+    Reads a hardware config file as a dict.
+    """
+    return read_config_file(input_file, HARDWARE_KEYS,
+                            check_hardware_config_file)
 
-_MACHINE_CONFIG_TERM_AMOUNT = 5
+def read_image_config_file(input_file):
+    """
+    Reads a image config file as a dict.
+    """
+    return read_config_file(input_file, IMAGE_KEYS,
+                            check_image_config_file)
 
-# Use python3 to help us check valid IP addresses and numbers
-def _check_num(num_as_str):
-    try:
-        return bool(int(num_as_str) >= 0)
-    except ValueError:
-        return False
+def read_flavor_config_file(input_file):
+    """
+    Reads a flavor config file as a dict.
+    """
+    return read_config_file(input_file, FLAVOR_KEYS,
+                            check_flavor_config_file)
 
-def _check_ip_addr(ip_as_str):
-    try:
-        ipaddress.ip_address(ip_as_str)
-        return True
-    except ValueError:
-        return False
+def import_hardware_config(input_file, output_file=HARDWARE_FILE):
+    """
+    Reads and saves a hardware config file as a JSON file.
+    """
+    (status, data, err_msg) = read_hardware_config_file(input_file)
+    print('status')
+    print(status)
+    if status is False:
+        return (False, err_msg)
+    print('yay')
+    return write_state(data, output_file)
 
-# Check if the file formats for the different configs are valid
-def _check_hardware_config_file_format(file_lines):
-    if len(file_lines) == 0:
-        return (False, "Empty File.\n")
+def import_image_config(input_file, output_file=IMAGE_FILE):
+    """
+    Reads and saves a image config file as a JSON file.
+    """
+    (status, data, err_msg) = read_image_config_file(input_file)
+    if status is False:
+        return (False, err_msg)
 
-    # the first line tells us how many machine configs we have
-    if _check_num(file_lines[0]) is False:
-        return (False, "First line (number of machine configs) is NaN.\n")
+    return write_state(data, output_file)
 
-    num_machines = int(file_lines[0])
+def import_flavor_config(input_file, output_file=FLAVOR_FILE):
+    """
+    Reads and saves a flavor config file as a JSON file.
+    """
+    (status, data, err_msg) = read_flavor_config_file(input_file)
+    if status is False:
+        return (False, err_msg)
 
-    # do the number of machines match up?
-    machines = file_lines[1:]
-    if len(machines) != num_machines:
-        error_message = ("First line (number of machine configs) does not",
-                         "match the length of the file (machine configs).\n")
-        return (False, error_message)
+    return write_state(data, output_file)
 
-    # check each machine config line
-    for line, machine in enumerate(machines): # line is line number - 2
-        config = machine.split() # split by whitespace
+def load_hardware_config(state_file=HARDWARE_FILE):
+    """
+    Loads a JSON file (state_file) as a dict.
+    """
+    return load_state(state_file)
 
-        # does the individual machine config have the right number of terms?
-        if (len(config) != _MACHINE_CONFIG_TERM_AMOUNT):
-            error_message = ("In line {}:\n".format(line + 2),
-                             "Invalid number of terms.",
-                             "Expected {} terms.\n".format(_MACHINE_CONFIG_TERM_AMOUNT))
-            return (False, error_message)
+def load_image_config(state_file=IMAGE_FILE):
+    """
+    Loads a JSON file (state_file) as a dict.
+    """
+    return load_state(state_file)
 
-        # does each term have the right format?
-        # 0th term is a string (name of machine)
-        # 1st term is an IP address
-        if _check_ip_addr(config[1]) is False:
-            error_message = ("In line {}:\n".format(line + 2),
-                             "Invalid IP address: [{}].\n".format(config[1]))
-            return (False, error_message)
-
-        # 2nd term is an int (RAM size in GB)
-        if _check_num(config[2]) is False:
-            error_message = ("In line {}:\n".format(line + 2),
-                             "Invalid postive num (RAM): ",
-                             "[{}].\n".format(config[2]))
-            return (False, error_message)
-        
-        # 3rd term is an int (number of disks)
-        if _check_num(config[3]) is False:
-            error_message = ("In line {}:\n".format(line + 2),
-                             "Invalid postive num (disks): ",
-                             "[{}].\n".format(config[3]))
-            return (False, error_message)
- 
-        # 4th term is an int (number of VCPUs)
-        if _check_num(config[4]) is False:
-            error_message = ("In line {}:\n".format(line + 2),
-                             "Invalid postive num (VCPUs): ",
-                             "[{}].\n".format(config[4]))
-            return (False, error_message)
-
-    return (True, "File successfully parsed.")
- 
-def _check_image_config_file_format(file_lines):
-    pass
-
-def _check_flavor_config_file_format(file_lines):
-    pass
+def load_flavor_config(state_file=FLAVOR_FILE):
+    """
+    Loads a JSON file (state_file) as a dict.
+    """
+    return load_state(state_file)

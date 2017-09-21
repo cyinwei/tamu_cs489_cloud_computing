@@ -78,4 +78,4 @@ It's tougher for datacenters, because they have more dimensions to work with.  ï
 ### Question 10: Could I do it?
 If large cloud providers such as Microsoft Azure or Amazon AWS were to merge, and they hire you to run the combined data centers, would you be able to achieve higher cost efficiency?
 
-Not right now.  But maybe after learning this class I can start doing it.  
+I would start by consolidating, or standardizing.  I would merge the software stacks, the hardware, etc to have a standard data center architecture.  Then I would start phasing AWS and Azure to use that set.  With a larger budget, I could probably buy or develop a set of custom datacenter hardware components at an economic price.  I would also reuse and design IaaS software (Openstack, AWS CLI) to automate the cloud as much as possible.  By doing so, I think eventually we'll be able to get a higher cost efficiency (operational).  (Basically following the 3 economies of scale)
