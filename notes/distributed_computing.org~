@@ -1,0 +1,27 @@
+* Distributed Computing
+** What is it?
+*** Abstracting a network of "computers" to be a single computer.
+**** What makes up the network?
+***** "Computers" can be hardware devices, like a server, or pure software, like a VM or a process.
+****** We call these "computers" *nodes* (from graph theory?).
+***** So the members of a network, or nodes, vary in computing power, connectivity, etc.  Like the internet.
+****** What happens if a server goes down?  Like a website goes down?  That's a problem.  (Fault detection & tolerance)
+**** What is the actually the single computer?
+***** It is actually a "single coherent system."
+****** The individual components are abstracted away, so we don't worry about the individual parts (nodes, connections).
+******* Analogy: When we're driving a car, do we worry about the engine, the transmission, the gearbox, the differential?  NO.
+******* Analogy: When we're running OSX, do we worry about the CPU, the buses, the DRAM, the disk?  NO.
+****** Instead of an OS, distributed systems are usually products or solve a specific problem.
+** How do we implement a distributed systems?
+*** The challenges
+**** Failure
+**** Concurrency
+**** Synchronization
+**** Scaling
+*** Examples of specific problems [to solve the challenges]
+**** Consensus
+**** Leader Election
+**** Group Management
+**** Failure Detection
+**** Clock synchronization
+** Cloud computing?  Distributed systems?  How are they related?

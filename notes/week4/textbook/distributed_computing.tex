@@ -1,0 +1,228 @@
+% Created 2017-09-22 Fri 23:32
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{fixltx2e}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{float}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{textcomp}
+\usepackage{marvosym}
+\usepackage{wasysym}
+\usepackage{amssymb}
+\usepackage{hyperref}
+\tolerance=1000
+\author{Yinwei (Charlie) Zhang}
+\date{\today}
+\title{Distributed Computing (Van Steen) Ch. 1 Notes}
+\hypersetup{
+  pdfkeywords={},
+  pdfsubject={},
+  pdfcreator={Emacs 25.2.1 (Org mode 8.2.10)}}
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+\section{Chapter 1: Introduction}
+\label{sec-1}
+\subsection{Summary}
+\label{sec-1-1}
+\subsubsection{Distributed systems are a network of computing elements that get abstracted into a single coherent system.}
+\label{sec-1-1-1}
+\begin{enumerate}
+\item The network can be made up of different nodes with different computing power and connectivity.
+\label{sec-1-1-1-1}
+\item The coherent system should be transparent.  That is, the details are abstracted away.
+\label{sec-1-1-1-2}
+\begin{enumerate}
+\item Analogy: Unix Filesystem, where files, devices, buffers, and any other hardware component is abstracted as a file.
+\label{sec-1-1-1-2-1}
+\end{enumerate}
+\end{enumerate}
+\subsubsection{In designing the distributed system, you should consider the transparency and scalability.}
+\label{sec-1-1-2}
+\begin{enumerate}
+\item There are different dimensions in transparency (the details in the network).
+\label{sec-1-1-2-1}
+\begin{enumerate}
+\item Data location (and relocation), data replication, concurrency, failure, and data access.
+\label{sec-1-1-2-1-1}
+\item You might design a system to be \textbf{not} transparent.
+\label{sec-1-1-2-1-2}
+\begin{enumerate}
+\item That way, the user has better context and can understand if a node went down, etc.
+\label{sec-1-1-2-1-2-1}
+\begin{enumerate}
+\item Like a REST 500 error.
+\label{sec-1-1-2-1-2-1-1}
+\end{enumerate}
+\end{enumerate}
+\end{enumerate}
+\item There are different aspects of scalability.
+\label{sec-1-1-2-2}
+\begin{enumerate}
+\item Adding more users / load, but also geographical scalability (different regions) and adminstrator (different admins) scalability.
+\label{sec-1-1-2-2-1}
+\begin{enumerate}
+\item For example, AWS has many 'admins' on at once (different users) with different regions.
+\label{sec-1-1-2-2-1-1}
+\end{enumerate}
+\end{enumerate}
+\end{enumerate}
+\subsubsection{Implemention is really complex.  But generally, there are different subsystems for different needs.}
+\label{sec-1-1-3}
+\begin{enumerate}
+\item Can't make optimistic assumptions.
+\label{sec-1-1-3-1}
+\begin{enumerate}
+\item We think our system has a secure, reliable network, with the same structure of nodes, with zero latency and no bandwith costs.  Network costs are free.  And with one admin.
+\label{sec-1-1-3-1-1}
+\begin{enumerate}
+\item In real life, we can't make those assumptions.  Think the internet.  Insecure, unreliable, multiple admins, expensive network.
+\label{sec-1-1-3-1-1-1}
+\end{enumerate}
+\end{enumerate}
+\item How do we run jobs on individual nodes?
+\label{sec-1-1-3-2}
+\begin{enumerate}
+\item RPC (Remote Controlled Procedure).
+\label{sec-1-1-3-2-1}
+\begin{enumerate}
+\item Since RPC needs both the caller and the runner to be available, middleware that holds the information, called messaging middleware, is important.
+\label{sec-1-1-3-2-1-1}
+\begin{enumerate}
+\item e.g. Logging distributed systems, like Apache Kafka or RabbitMQ.
+\label{sec-1-1-3-2-1-1-1}
+\end{enumerate}
+\end{enumerate}
+\end{enumerate}
+\item How to we store, get, and update data?
+\label{sec-1-1-3-3}
+\begin{enumerate}
+\item With ACID transactions.
+\label{sec-1-1-3-3-1}
+\begin{enumerate}
+\item Similar to a Relational DB, transactions group a query together so that the transaction is atomic, consistent, isolated, and durable.
+\label{sec-1-1-3-3-1-1}
+\end{enumerate}
+\end{enumerate}
+\item How do we scale up?
+\label{sec-1-1-3-4}
+\begin{enumerate}
+\item We can hide communication latencies (no idle CPU time) by using asynchronous requests, batching requests, and often in parallel.
+\label{sec-1-1-3-4-1}
+\item We can shard a system, splitting the data or functionality into smaller parts.
+\label{sec-1-1-3-4-2}
+\begin{enumerate}
+\item Ex. The DNS system shards the .com or .edu to different subsystems called zones.
+\label{sec-1-1-3-4-2-1}
+\end{enumerate}
+\item We might need to replicate data to ensure availablity, sinced scaled nodes cause more opportunity for failure.
+\label{sec-1-1-3-4-3}
+\begin{enumerate}
+\item Problem: Negative feedback loop, more replication needs more nodes, which can cause a higher likelihood of failure.
+\label{sec-1-1-3-4-3-1}
+\item Problem: Need to maintain consistency between different stores.
+\label{sec-1-1-3-4-3-2}
+\end{enumerate}
+\end{enumerate}
+\end{enumerate}
+\subsubsection{There many different distributed systems today, from high performance computing (HPC) to clusters to cloud computing to "persuasive" computing.}
+\label{sec-1-1-4}
+\begin{enumerate}
+\item HPC do simuations, solve complex math problems (tensors?), do machine learning, etc.
+\label{sec-1-1-4-1}
+\begin{enumerate}
+\item Can be implemented as a cluster (homogenous network, where the hardware is similar) or as a grid (a collection of different computer systems with different owners, hardware, and software).
+\label{sec-1-1-4-1-1}
+\end{enumerate}
+\item Cloud computing provides a service, whether thats an Infrastructure, Platform, or Software (IaaS, Paas, SaaS).  These services are rented out like an utility (like water), or X per node-hour.
+\label{sec-1-1-4-2}
+\begin{enumerate}
+\item Infrastructure is the physical datacenters, which aren't marketed.  Usually done by the DevOps team.
+\label{sec-1-1-4-2-1}
+\item Platforms let you setup workflows and systems up.  Like AWS EC2, which lets you set up VMs, or AWS S3, which let you upload blobs (pictures, videos).
+\label{sec-1-1-4-2-2}
+\item Software provides a human used program, like Dropbox or Youtube.
+\label{sec-1-1-4-2-3}
+\end{enumerate}
+\item Persuasive systems are computers that are everywhere, like sensors or mobile networks.
+\label{sec-1-1-4-3}
+\begin{enumerate}
+\item An extreme is the ubiqutous system, which is everywhere and always connected (think smarthome?)
+\label{sec-1-1-4-3-1}
+\begin{enumerate}
+\item Design requirements include distribution, interaction, context awareness, autonomy, and intelligence.
+\label{sec-1-1-4-3-1-1}
+\end{enumerate}
+\item Mobile networks can make ad hoc wireless networks (MANET), where they act as nodes.
+\label{sec-1-1-4-3-2}
+\item Sensor networks can either send all their data back, or hold data and respond to queries (save energy).  Or there might be an intermediate processing system.
+\label{sec-1-1-4-3-3}
+\end{enumerate}
+\end{enumerate}
+\subsection{Thoughts}
+\label{sec-1-2}
+\subsubsection{What about the web and REST?  Isn't it the de facto or most popular distributed systems protocol in commerical services / cloud?}
+\label{sec-1-2-1}
+\begin{enumerate}
+\item In the book, Van Steen brought up RPCs and SOAs (server oriented architecture, next chapter), where nodes run functions.  I remember at Walmart working on their backend distributed system, and they were moving away from RPCs which built SOAs.  Instead every service was a ROA (resource oriented architecture) and the server was a RESTful API.
+\label{sec-1-2-1-1}
+\item So we had microservices communicated with each other through REST.  The way nodes work on the web today is primarily through restful APIs.  Github API.  Facebook API (even though it's graphbased, we query through REST).
+\label{sec-1-2-1-2}
+\item With startups, we encouraged to use the the cloud (AWS, Firebase) as our platform backend.  And the way the client connects (as a node to the system) is through REST.
+\label{sec-1-2-1-3}
+\item So how come its not mentioned at all?
+\label{sec-1-2-1-4}
+\end{enumerate}
+\subsubsection{Immutable State.}
+\label{sec-1-2-2}
+\begin{enumerate}
+\item The idea is that every data structure is immutable, so a change in state results in an entirely new state.  With that, you sacrifice some efficiency (allocated new objects or at least a ledger diff) but you have immutable state.  Which makes dealing with concurrency a lot easier.  Managing consistency becomes easier.
+\label{sec-1-2-2-1}
+\item I know Facebook and their web platform (Redux, Immutable.js) uses it to make ReactJS much easier to develop in.
+\label{sec-1-2-2-2}
+\item How come we don't see immutable distributed databases out there (Google showed me DAtomic)?
+\label{sec-1-2-2-3}
+\end{enumerate}
+\subsubsection{CAP theorem and ACID and distributed databases.  How do they all work together?}
+\label{sec-1-2-3}
+\begin{enumerate}
+\item Like if we sacrifice C, they by definition our database isn't consistent, so no ACID.
+\label{sec-1-2-3-1}
+\item So acid distributed databases are either outdated (availablitity) or slow (lack or partition tolerance?)
+\label{sec-1-2-3-2}
+\item Might be for later\ldots{}
+\label{sec-1-2-3-3}
+\end{enumerate}
+\subsubsection{How is transparency linked with assumptions?}
+\label{sec-1-2-4}
+\begin{enumerate}
+\item In the introduction, Van Steen stated that total transparency (network completely abstracted away) is impossible and sometimes a bad idea.
+\label{sec-1-2-4-1}
+\item Is that related to the assumptions we make when designing a distributed system?
+\label{sec-1-2-4-2}
+\item For example: If we have a unreliable network, expose the that part (connections, failure) of and intransparent and let the app / user deal with it
+\label{sec-1-2-4-3}
+\begin{enumerate}
+\item Ex: A website is taking too long to load, so the app displays a loading symbol, so the user understands and can close.
+\label{sec-1-2-4-3-1}
+\end{enumerate}
+\end{enumerate}
+\subsubsection{EXTRA: What about microservices?}
+\label{sec-1-2-5}
+\begin{enumerate}
+\item Buzzword\ldots{} I remember reading stuff from Uber and Netflix that they implemented their distributed system architecture with a set of microservices.
+\label{sec-1-2-5-1}
+\item How do they fit in?  Are they a set of small PaaS cloud service (I'm assuming)?  Or are they a grid system?  I guess it's based on how the microservice is implemented?
+\label{sec-1-2-5-2}
+\item What's the idea behind them (outside the scope of the reading but\ldots{})
+\label{sec-1-2-5-3}
+\end{enumerate}
+% Emacs 25.2.1 (Org mode 8.2.10)
+\end{document}

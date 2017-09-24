@@ -1,0 +1,69 @@
+#+TITLE: Distributed Computing (Van Steen) Ch. 1 Notes
+* Chapter 1: Introduction
+** Summary
+*** Distributed systems are a network of computing elements that get abstracted into a single coherent system.
+**** The network can be made up of different nodes with different computing power and connectivity.
+**** The coherent system should be transparent.  That is, the details are abstracted away.
+***** Analogy: Unix Filesystem, where files, devices, buffers, and any other hardware component is abstracted as a file.
+*** In designing the distributed system, you should consider the transparency and scalability.
+**** There are different dimensions in transparency (the details in the network).
+***** Data location (and relocation), data replication, concurrency, failure, and data access.
+***** You might design a system to be *not* transparent.
+****** That way, the user has better context and can understand if a node went down, etc.
+******* Like a REST 500 error.
+**** There are different aspects of scalability.
+***** Adding more users / load, but also geographical scalability (different regions) and adminstrator (different admins) scalability.
+****** For example, AWS has many 'admins' on at once (different users) with different regions.
+*** Implemention is really complex.  But generally, there are different subsystems for different needs.
+**** Can't make optimistic assumptions.
+***** We think our system has a secure, reliable network, with the same structure of nodes, with zero latency and no bandwith costs.  Network costs are free.  And with one admin.
+****** In real life, we can't make those assumptions.  Think the internet.  Insecure, unreliable, multiple admins, expensive network.
+**** How do we run jobs on individual nodes?
+***** RPC (Remote Controlled Procedure).
+****** Since RPC needs both the caller and the runner to be available, middleware that holds the information, called messaging middleware, is important.
+******* e.g. Logging distributed systems, like Apache Kafka or RabbitMQ.
+**** How to we store, get, and update data?
+***** With ACID transactions.
+****** Similar to a Relational DB, transactions group a query together so that the transaction is atomic, consistent, isolated, and durable.
+**** How do we scale up?
+***** We can hide communication latencies (no idle CPU time) by using asynchronous requests, batching requests, and often in parallel.
+***** We can shard a system, splitting the data or functionality into smaller parts.
+****** Ex. The DNS system shards the .com or .edu to different subsystems called zones.
+***** We might need to replicate data to ensure availablity, sinced scaled nodes cause more opportunity for failure.
+****** Problem: Negative feedback loop, more replication needs more nodes, which can cause a higher likelihood of failure.
+****** Problem: Need to maintain consistency between different stores.
+*** There many different distributed systems today, from high performance computing (HPC) to clusters to cloud computing to "persuasive" computing.
+**** HPC do simuations, solve complex math problems (tensors?), do machine learning, etc.
+***** Can be implemented as a cluster (homogenous network, where the hardware is similar) or as a grid (a collection of different computer systems with different owners, hardware, and software).
+**** Cloud computing provides a service, whether thats an Infrastructure, Platform, or Software (IaaS, Paas, SaaS).  These services are rented out like an utility (like water), or X per node-hour.
+***** Infrastructure is the physical datacenters, which aren't marketed.  Usually done by the DevOps team.
+***** Platforms let you setup workflows and systems up.  Like AWS EC2, which lets you set up VMs, or AWS S3, which let you upload blobs (pictures, videos).
+***** Software provides a human used program, like Dropbox or Youtube.
+**** Persuasive systems are computers that are everywhere, like sensors or mobile networks.
+***** An extreme is the ubiqutous system, which is everywhere and always connected (think smarthome?)
+****** Design requirements include distribution, interaction, context awareness, autonomy, and intelligence.
+***** Mobile networks can make ad hoc wireless networks (MANET), where they act as nodes.
+***** Sensor networks can either send all their data back, or hold data and respond to queries (save energy).  Or there might be an intermediate processing system.
+** Thoughts
+*** What about the web and REST?  Isn't it the de facto or most popular distributed systems protocol in commerical services / cloud?
+**** In the book, Van Steen brought up RPCs and SOAs (server oriented architecture, next chapter), where nodes run functions.  I remember at Walmart working on their backend distributed system, and they were moving away from RPCs which built SOAs.  Instead every service was a ROA (resource oriented architecture) and the server was a RESTful API.
+**** So we had microservices communicated with each other through REST.  The way nodes work on the web today is primarily through restful APIs.  Github API.  Facebook API (even though it's graphbased, we query through REST).
+**** With startups, we encouraged to use the the cloud (AWS, Firebase) as our platform backend.  And the way the client connects (as a node to the system) is through REST.
+**** So how come its not mentioned at all?
+*** Immutable State.
+**** The idea is that every data structure is immutable, so a change in state results in an entirely new state.  With that, you sacrifice some efficiency (allocated new objects or at least a ledger diff) but you have immutable state.  Which makes dealing with concurrency a lot easier.  Managing consistency becomes easier.
+**** I know Facebook and their web platform (Redux, Immutable.js) uses it to make ReactJS much easier to develop in.  
+**** How come we don't see immutable distributed databases out there (Google showed me DAtomic)?
+*** CAP theorem and ACID and distributed databases.  How do they all work together?
+**** Like if we sacrifice C, they by definition our database isn't consistent, so no ACID.
+**** So acid distributed databases are either outdated (availablitity) or slow (lack or partition tolerance?)
+**** Might be for later... 
+*** How is transparency linked with assumptions?
+**** In the introduction, Van Steen stated that total transparency (network completely abstracted away) is impossible and sometimes a bad idea.
+**** Is that related to the assumptions we make when designing a distributed system?
+**** For example: If we have a unreliable network, expose the that part (connections, failure) of and intransparent and let the app / user deal with it
+***** Ex: A website is taking too long to load, so the app displays a loading symbol, so the user understands and can close.
+*** EXTRA: What about microservices?
+**** Buzzword... I remember reading stuff from Uber and Netflix that they implemented their distributed system architecture with a set of microservices.
+**** How do they fit in?  Are they a set of small PaaS cloud service (I'm assuming)?  Or are they a grid system?  I guess it's based on how the microservice is implemented?
+**** What's the idea behind them (outside the scope of the reading but...)

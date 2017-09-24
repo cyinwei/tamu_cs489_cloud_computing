@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>Distributed Computing (Van Steen) Ch. 1 Notes</title>
+<!-- 2017-09-22 Fri 23:31 -->
+<meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta  name="generator" content="Org-mode" />
+<meta  name="author" content="Yinwei (Charlie) Zhang" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  pre.src-sh:before    { content: 'sh'; }
+  pre.src-bash:before  { content: 'sh'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-R:before     { content: 'R'; }
+  pre.src-perl:before  { content: 'Perl'; }
+  pre.src-java:before  { content: 'Java'; }
+  pre.src-sql:before   { content: 'SQL'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.right  { text-align: center;  }
+  th.left   { text-align: center;   }
+  th.center { text-align: center; }
+  td.right  { text-align: right;  }
+  td.left   { text-align: left;   }
+  td.center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara:nth-child(2) { display: inline; }
+  .footpara { display: block; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  /*]]>*/-->
+</style>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">Distributed Computing (Van Steen) Ch. 1 Notes</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">1. Chapter 1: Introduction</a>
+<ul>
+<li><a href="#sec-1-1">1.1. Summary</a>
+<ul>
+<li><a href="#sec-1-1-1">1.1.1. Distributed systems are a network of computing elements that get abstracted into a single coherent system.</a></li>
+<li><a href="#sec-1-1-2">1.1.2. In designing the distributed system, you should consider the transparency and scalability.</a></li>
+<li><a href="#sec-1-1-3">1.1.3. Implemention is really complex.  But generally, there are different subsystems for different needs.</a></li>
+<li><a href="#sec-1-1-4">1.1.4. There many different distributed systems today, from high performance computing (HPC) to clusters to cloud computing to "persuasive" computing.</a></li>
+</ul>
+</li>
+<li><a href="#sec-1-2">1.2. Thoughts</a>
+<ul>
+<li><a href="#sec-1-2-1">1.2.1. What about the web and REST?  Isn't it the de facto or most popular distributed systems protocol in commerical services / cloud?</a></li>
+<li><a href="#sec-1-2-2">1.2.2. Immutable State.</a></li>
+<li><a href="#sec-1-2-3">1.2.3. CAP theorem and ACID and distributed databases.  How do they all work together?</a></li>
+<li><a href="#sec-1-2-4">1.2.4. How is transparency linked with assumptions?</a></li>
+<li><a href="#sec-1-2-5">1.2.5. EXTRA: What about microservices?</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> Chapter 1: Introduction</h2>
+<div class="outline-text-2" id="text-1">
+</div><div id="outline-container-sec-1-1" class="outline-3">
+<h3 id="sec-1-1"><span class="section-number-3">1.1</span> Summary</h3>
+<div class="outline-text-3" id="text-1-1">
+</div><div id="outline-container-sec-1-1-1" class="outline-4">
+<h4 id="sec-1-1-1"><span class="section-number-4">1.1.1</span> Distributed systems are a network of computing elements that get abstracted into a single coherent system.</h4>
+<div class="outline-text-4" id="text-1-1-1">
+</div><ol class="org-ol"><li><a id="sec-1-1-1-1" name="sec-1-1-1-1"></a>The network can be made up of different nodes with different computing power and connectivity.<br  /></li>
+<li><a id="sec-1-1-1-2" name="sec-1-1-1-2"></a>The coherent system should be transparent.  That is, the details are abstracted away.<br  /><ol class="org-ol"><li><a id="sec-1-1-1-2-1" name="sec-1-1-1-2-1"></a>Analogy: Unix Filesystem, where files, devices, buffers, and any other hardware component is abstracted as a file.<br  /></li></ol>
+</li></ol>
+</div>
+<div id="outline-container-sec-1-1-2" class="outline-4">
+<h4 id="sec-1-1-2"><span class="section-number-4">1.1.2</span> In designing the distributed system, you should consider the transparency and scalability.</h4>
+<div class="outline-text-4" id="text-1-1-2">
+</div><ol class="org-ol"><li><a id="sec-1-1-2-1" name="sec-1-1-2-1"></a>There are different dimensions in transparency (the details in the network).<br  /><ol class="org-ol"><li><a id="sec-1-1-2-1-1" name="sec-1-1-2-1-1"></a>Data location (and relocation), data replication, concurrency, failure, and data access.<br  /></li>
+<li><a id="sec-1-1-2-1-2" name="sec-1-1-2-1-2"></a>You might design a system to be <b>not</b> transparent.<br  /><ol class="org-ol"><li><a id="sec-1-1-2-1-2-1" name="sec-1-1-2-1-2-1"></a>That way, the user has better context and can understand if a node went down, etc.<br  /><ol class="org-ol"><li><a id="sec-1-1-2-1-2-1-1" name="sec-1-1-2-1-2-1-1"></a>Like a REST 500 error.<br  /></li></ol>
+</li></ol>
+</li></ol>
+</li>
+<li><a id="sec-1-1-2-2" name="sec-1-1-2-2"></a>There are different aspects of scalability.<br  /><ol class="org-ol"><li><a id="sec-1-1-2-2-1" name="sec-1-1-2-2-1"></a>Adding more users / load, but also geographical scalability (different regions) and adminstrator (different admins) scalability.<br  /><ol class="org-ol"><li><a id="sec-1-1-2-2-1-1" name="sec-1-1-2-2-1-1"></a>For example, AWS has many 'admins' on at once (different users) with different regions.<br  /></li></ol>
+</li></ol>
+</li></ol>
+</div>
+<div id="outline-container-sec-1-1-3" class="outline-4">
+<h4 id="sec-1-1-3"><span class="section-number-4">1.1.3</span> Implemention is really complex.  But generally, there are different subsystems for different needs.</h4>
+<div class="outline-text-4" id="text-1-1-3">
+</div><ol class="org-ol"><li><a id="sec-1-1-3-1" name="sec-1-1-3-1"></a>Can't make optimistic assumptions.<br  /><ol class="org-ol"><li><a id="sec-1-1-3-1-1" name="sec-1-1-3-1-1"></a>We think our system has a secure, reliable network, with the same structure of nodes, with zero latency and no bandwith costs.  Network costs are free.  And with one admin.<br  /><ol class="org-ol"><li><a id="sec-1-1-3-1-1-1" name="sec-1-1-3-1-1-1"></a>In real life, we can't make those assumptions.  Think the internet.  Insecure, unreliable, multiple admins, expensive network.<br  /></li></ol>
+</li></ol>
+</li>
+<li><a id="sec-1-1-3-2" name="sec-1-1-3-2"></a>How do we run jobs on individual nodes?<br  /><ol class="org-ol"><li><a id="sec-1-1-3-2-1" name="sec-1-1-3-2-1"></a>RPC (Remote Controlled Procedure).<br  /><ol class="org-ol"><li><a id="sec-1-1-3-2-1-1" name="sec-1-1-3-2-1-1"></a>Since RPC needs both the caller and the runner to be available, middleware that holds the information, called messaging middleware, is important.<br  /><ol class="org-ol"><li><a id="sec-1-1-3-2-1-1-1" name="sec-1-1-3-2-1-1-1"></a>e.g. Logging distributed systems, like Apache Kafka or RabbitMQ.<br  /></li></ol>
+</li></ol>
+</li></ol>
+</li>
+<li><a id="sec-1-1-3-3" name="sec-1-1-3-3"></a>How to we store, get, and update data?<br  /><ol class="org-ol"><li><a id="sec-1-1-3-3-1" name="sec-1-1-3-3-1"></a>With ACID transactions.<br  /><ol class="org-ol"><li><a id="sec-1-1-3-3-1-1" name="sec-1-1-3-3-1-1"></a>Similar to a Relational DB, transactions group a query together so that the transaction is atomic, consistent, isolated, and durable.<br  /></li></ol>
+</li></ol>
+</li>
+<li><a id="sec-1-1-3-4" name="sec-1-1-3-4"></a>How do we scale up?<br  /><ol class="org-ol"><li><a id="sec-1-1-3-4-1" name="sec-1-1-3-4-1"></a>We can hide communication latencies (no idle CPU time) by using asynchronous requests, batching requests, and often in parallel.<br  /></li>
+<li><a id="sec-1-1-3-4-2" name="sec-1-1-3-4-2"></a>We can shard a system, splitting the data or functionality into smaller parts.<br  /><ol class="org-ol"><li><a id="sec-1-1-3-4-2-1" name="sec-1-1-3-4-2-1"></a>Ex. The DNS system shards the .com or .edu to different subsystems called zones.<br  /></li></ol>
+</li>
+<li><a id="sec-1-1-3-4-3" name="sec-1-1-3-4-3"></a>We might need to replicate data to ensure availablity, sinced scaled nodes cause more opportunity for failure.<br  /><ol class="org-ol"><li><a id="sec-1-1-3-4-3-1" name="sec-1-1-3-4-3-1"></a>Problem: Negative feedback loop, more replication needs more nodes, which can cause a higher likelihood of failure.<br  /></li>
+<li><a id="sec-1-1-3-4-3-2" name="sec-1-1-3-4-3-2"></a>Problem: Need to maintain consistency between different stores.<br  /></li></ol>
+</li></ol>
+</li></ol>
+</div>
+<div id="outline-container-sec-1-1-4" class="outline-4">
+<h4 id="sec-1-1-4"><span class="section-number-4">1.1.4</span> There many different distributed systems today, from high performance computing (HPC) to clusters to cloud computing to "persuasive" computing.</h4>
+<div class="outline-text-4" id="text-1-1-4">
+</div><ol class="org-ol"><li><a id="sec-1-1-4-1" name="sec-1-1-4-1"></a>HPC do simuations, solve complex math problems (tensors?), do machine learning, etc.<br  /><ol class="org-ol"><li><a id="sec-1-1-4-1-1" name="sec-1-1-4-1-1"></a>Can be implemented as a cluster (homogenous network, where the hardware is similar) or as a grid (a collection of different computer systems with different owners, hardware, and software).<br  /></li></ol>
+</li>
+<li><a id="sec-1-1-4-2" name="sec-1-1-4-2"></a>Cloud computing provides a service, whether thats an Infrastructure, Platform, or Software (IaaS, Paas, SaaS).  These services are rented out like an utility (like water), or X per node-hour.<br  /><ol class="org-ol"><li><a id="sec-1-1-4-2-1" name="sec-1-1-4-2-1"></a>Infrastructure is the physical datacenters, which aren't marketed.  Usually done by the DevOps team.<br  /></li>
+<li><a id="sec-1-1-4-2-2" name="sec-1-1-4-2-2"></a>Platforms let you setup workflows and systems up.  Like AWS EC2, which lets you set up VMs, or AWS S3, which let you upload blobs (pictures, videos).<br  /></li>
+<li><a id="sec-1-1-4-2-3" name="sec-1-1-4-2-3"></a>Software provides a human used program, like Dropbox or Youtube.<br  /></li></ol>
+</li>
+<li><a id="sec-1-1-4-3" name="sec-1-1-4-3"></a>Persuasive systems are computers that are everywhere, like sensors or mobile networks.<br  /><ol class="org-ol"><li><a id="sec-1-1-4-3-1" name="sec-1-1-4-3-1"></a>An extreme is the ubiqutous system, which is everywhere and always connected (think smarthome?)<br  /><ol class="org-ol"><li><a id="sec-1-1-4-3-1-1" name="sec-1-1-4-3-1-1"></a>Design requirements include distribution, interaction, context awareness, autonomy, and intelligence.<br  /></li></ol>
+</li>
+<li><a id="sec-1-1-4-3-2" name="sec-1-1-4-3-2"></a>Mobile networks can make ad hoc wireless networks (MANET), where they act as nodes.<br  /></li>
+<li><a id="sec-1-1-4-3-3" name="sec-1-1-4-3-3"></a>Sensor networks can either send all their data back, or hold data and respond to queries (save energy).  Or there might be an intermediate processing system.<br  /></li></ol>
+</li></ol>
+</div>
+</div>
+<div id="outline-container-sec-1-2" class="outline-3">
+<h3 id="sec-1-2"><span class="section-number-3">1.2</span> Thoughts</h3>
+<div class="outline-text-3" id="text-1-2">
+</div><div id="outline-container-sec-1-2-1" class="outline-4">
+<h4 id="sec-1-2-1"><span class="section-number-4">1.2.1</span> What about the web and REST?  Isn't it the de facto or most popular distributed systems protocol in commerical services / cloud?</h4>
+<div class="outline-text-4" id="text-1-2-1">
+</div><ol class="org-ol"><li><a id="sec-1-2-1-1" name="sec-1-2-1-1"></a>In the book, Van Steen brought up RPCs and SOAs (server oriented architecture, next chapter), where nodes run functions.  I remember at Walmart working on their backend distributed system, and they were moving away from RPCs which built SOAs.  Instead every service was a ROA (resource oriented architecture) and the server was a RESTful API.<br  /></li>
+<li><a id="sec-1-2-1-2" name="sec-1-2-1-2"></a>So we had microservices communicated with each other through REST.  The way nodes work on the web today is primarily through restful APIs.  Github API.  Facebook API (even though it's graphbased, we query through REST).<br  /></li>
+<li><a id="sec-1-2-1-3" name="sec-1-2-1-3"></a>With startups, we encouraged to use the the cloud (AWS, Firebase) as our platform backend.  And the way the client connects (as a node to the system) is through REST.<br  /></li>
+<li><a id="sec-1-2-1-4" name="sec-1-2-1-4"></a>So how come its not mentioned at all?<br  /></li></ol>
+</div>
+<div id="outline-container-sec-1-2-2" class="outline-4">
+<h4 id="sec-1-2-2"><span class="section-number-4">1.2.2</span> Immutable State.</h4>
+<div class="outline-text-4" id="text-1-2-2">
+</div><ol class="org-ol"><li><a id="sec-1-2-2-1" name="sec-1-2-2-1"></a>The idea is that every data structure is immutable, so a change in state results in an entirely new state.  With that, you sacrifice some efficiency (allocated new objects or at least a ledger diff) but you have immutable state.  Which makes dealing with concurrency a lot easier.  Managing consistency becomes easier.<br  /></li>
+<li><a id="sec-1-2-2-2" name="sec-1-2-2-2"></a>I know Facebook and their web platform (Redux, Immutable.js) uses it to make ReactJS much easier to develop in.<br  /></li>
+<li><a id="sec-1-2-2-3" name="sec-1-2-2-3"></a>How come we don't see immutable distributed databases out there (Google showed me DAtomic)?<br  /></li></ol>
+</div>
+<div id="outline-container-sec-1-2-3" class="outline-4">
+<h4 id="sec-1-2-3"><span class="section-number-4">1.2.3</span> CAP theorem and ACID and distributed databases.  How do they all work together?</h4>
+<div class="outline-text-4" id="text-1-2-3">
+</div><ol class="org-ol"><li><a id="sec-1-2-3-1" name="sec-1-2-3-1"></a>Like if we sacrifice C, they by definition our database isn't consistent, so no ACID.<br  /></li>
+<li><a id="sec-1-2-3-2" name="sec-1-2-3-2"></a>So acid distributed databases are either outdated (availablitity) or slow (lack or partition tolerance?)<br  /></li>
+<li><a id="sec-1-2-3-3" name="sec-1-2-3-3"></a>Might be for later&#x2026;<br  /></li></ol>
+</div>
+<div id="outline-container-sec-1-2-4" class="outline-4">
+<h4 id="sec-1-2-4"><span class="section-number-4">1.2.4</span> How is transparency linked with assumptions?</h4>
+<div class="outline-text-4" id="text-1-2-4">
+</div><ol class="org-ol"><li><a id="sec-1-2-4-1" name="sec-1-2-4-1"></a>In the introduction, Van Steen stated that total transparency (network completely abstracted away) is impossible and sometimes a bad idea.<br  /></li>
+<li><a id="sec-1-2-4-2" name="sec-1-2-4-2"></a>Is that related to the assumptions we make when designing a distributed system?<br  /></li>
+<li><a id="sec-1-2-4-3" name="sec-1-2-4-3"></a>For example: If we have a unreliable network, expose the that part (connections, failure) of and intransparent and let the app / user deal with it<br  /><ol class="org-ol"><li><a id="sec-1-2-4-3-1" name="sec-1-2-4-3-1"></a>Ex: A website is taking too long to load, so the app displays a loading symbol, so the user understands and can close.<br  /></li></ol>
+</li></ol>
+</div>
+<div id="outline-container-sec-1-2-5" class="outline-4">
+<h4 id="sec-1-2-5"><span class="section-number-4">1.2.5</span> EXTRA: What about microservices?</h4>
+<div class="outline-text-4" id="text-1-2-5">
+</div><ol class="org-ol"><li><a id="sec-1-2-5-1" name="sec-1-2-5-1"></a>Buzzword&#x2026; I remember reading stuff from Uber and Netflix that they implemented their distributed system architecture with a set of microservices.<br  /></li>
+<li><a id="sec-1-2-5-2" name="sec-1-2-5-2"></a>How do they fit in?  Are they a set of small PaaS cloud service (I'm assuming)?  Or are they a grid system?  I guess it's based on how the microservice is implemented?<br  /></li>
+<li><a id="sec-1-2-5-3" name="sec-1-2-5-3"></a>What's the idea behind them (outside the scope of the reading but&#x2026;)<br  /></li></ol>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: Yinwei (Charlie) Zhang</p>
+<p class="date">Created: 2017-09-22 Fri 23:31</p>
+<p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.2.1 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

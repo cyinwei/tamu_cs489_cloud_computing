@@ -1,6 +1,10 @@
-import os
-import pytest
+"""
+Contains python data fixtures or mocks we use for testing.
+"""
 
-_path = path = os.path.dirname(__file__) # the fixtures/ directory
-
-def get_flavor_lines
+IMAGES_DICT = {
+    'large': {'vcpu': '4', 'disk': 2, 'mem': 16},
+    'medium': {'vcpu': '4', 'disk': 2, 'mem': 8},
+    'small': {'vcpu': '1', 'disk': 1, 'mem': 1},
+    'xlarge': {'vcpu': '8', 'disk': 4, 'mem': 32}
+}

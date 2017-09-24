@@ -1,0 +1,67 @@
+#+TITLE: Distributed Computing (Van Steen) Ch. 1 Notes
+* Chapter 1: Introduction
+** Summary
+*** Distributed systems are a network of computing elements that get abstracted into a single coherent system.
+**** The network can be made up of different nodes with different computing power and connectivity.
+**** The coherent system should be transparent.  That is, the details are abstracted away.
+***** Analogy: Unix Filesystem, where files, devices, buffers, and any other hardware component is abstracted as a file.
+*** In designing the distributed system, you should consider the transparency and scalability.
+**** There are different dimensions in transparency (the details in the network).
+***** Data location (and relocation), data replication, concurrency, failure, and data access.
+***** You might design a system to be *not* transparent.
+****** That way, the user has better context and can understand if a node went down, etc.
+******* Like a REST 500 error.
+**** There are different aspects of scalability.
+***** Adding more users / load, but also geographical scalability (different regions) and adminstrator (different admins) scalability.
+****** For example, AWS has many 'admins' on at once (different users) with different regions.
+*** Implemention is really complex.  But generally, there are different subsystems for different needs.
+**** Can't make optimistic assumptions.
+***** We think our system has a secure, reliable network, with the same structure of nodes, with zero latency and no bandwith costs.  Network costs are free.  And with one admin.
+****** In real life, we can't make those assumptions.  Think the internet.  Insecure, unreliable, multiple admins, expensive network.
+**** How do we run jobs on individual nodes?
+***** RPC (Remote Controlled Procedure).
+****** Since RPC needs both the caller and the runner to be available, middleware that holds the information, called messaging middleware, is important.
+******* e.g. Logging distributed systems, like Apache Kafka or RabbitMQ.
+**** How to we store, get, and update data?
+***** With ACID transactions.
+****** Similar to a Relational DB, transactions group a query together so that the transaction is atomic, consistent, isolated, and durable.
+**** How do we scale up?
+***** We can hide communication latencies (no idle CPU time) by using asynchronous requests, batching requests, and often in parallel.
+***** We can shard a system, splitting the data or functionality into smaller parts.
+****** Ex. The DNS system shards the .com or .edu to different subsystems called zones.
+***** We might need to replicate data to ensure availablity, sinced scaled nodes cause more opportunity for failure.
+****** Problem: Negative feedback loop, more replication needs more nodes, which can cause a higher likelihood of failure.
+****** Problem: Need to maintain consistency between different stores.
+*** There many different distributed systems today, from high performance computing (HPC) to clusters to cloud computing to "persuasive" computing.
+**** HPC do simuations, solve complex math problems (tensors?), do machine learning, etc.
+***** Can be implemented as a cluster (homogenous network, where the hardware is similar) or as a grid (a collection of different computer systems with different owners, hardware, and software).
+**** Cloud computing provides a service, whether thats an Infrastructure, Platform, or Software (IaaS, Paas, SaaS).  These services are rented out like an utility (like water), or X per node-hour.
+***** Infrastructure is the physical datacenters, which aren't marketed.  Usually done by the DevOps team.
+***** Platforms let you setup workflows and systems up.  Like AWS EC2, which lets you set up VMs, or AWS S3, which let you upload blobs (pictures, videos).
+***** Software provides a human used program, like Dropbox or Youtube.
+**** Persuasive systems are computers that are everywhere, like sensors or mobile networks.
+***** An extreme is the ubiqutous system, which is everywhere and always connected (think smarthome?)
+****** Design requirements include distribution, interaction, context awareness, autonomy, and intelligence.
+***** Mobile networks can make ad hoc wireless networks (MANET), where they act as nodes.
+***** Sensor networks can either send all their data back, or hold data and respond to queries (save energy).  Or there might be an intermediate processing system.
+
+** Thoughts
+** Notes
+*** 1.1 What is a distributed system?
+**** A network of autonomous "computers" that appears to its users as a "single coherent system."
+***** The computers can be physical computers, or software processes.  Also known as *nodes.*
+****** Nodes can vary widely in computing power and connectivity.
+****** Networks can be insecure (think internet), so it's up to the system to decide how to manage *group membership*.
+******* Group membership: Admissions process.  Rules for letting an external node join a group.
+******* If there are no rules (public WiFi), then it's an *open group.*  Nodes can join, leave, and freely talk any other group node.
+******* If there are rules, then it's a *closed group.*  Nodes inside of the group have access, but there's an admissions process for a new node to enter the group. 
+****** How do nodes communicate with each other?
+******* A group is often organized with an *overlay network*, which gives each node a list of nodes it can talk to.
+******** NOTE: With overlay networks, the nodes are typically software processes.
+******** Each node in an overlay system should be connected (there's a path in the graph between any two nodes).
+******** If the list is well-defined (an algorithm or hardcoded), then it uses an *structured overlay.*
+******** If the list is random, then it uses an *unstructured overlay.*
+******** Example of an overlay system: P2P connections (torrenting).
+***** 
+*** 1.2 How do I design a distributed system?
+** Thoughts

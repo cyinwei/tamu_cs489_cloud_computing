@@ -1,0 +1,23 @@
+;; This buffer is for text that is not saved, and for Lisp evaluation.
+;; To create a file, visit it with <open> and enter text in its buffer.
+
+
+* Notes
+*** 1.1 What is a distributed system?
+**** A network of autonomous "computers" that appears to its users as a "single coherent system."
+***** The computers can be physical computers, or software processes.  Also known as *nodes.*
+****** Nodes can vary widely in computing power and connectivity.
+****** Networks can be insecure (think internet), so it's up to the system to decide how to manage *group membership*.
+******* Group membership: Admissions process.  Rules for letting an external node join a group.
+******* If there are no rules (public WiFi), then it's an *open group.*  Nodes can join, leave, and freely talk any other group node.
+******* If there are rules, then it's a *closed group.*  Nodes inside of the group have access, but there's an admissions process for a new node to enter the group. 
+****** How do nodes communicate with each other?
+******* A group is often organized with an *overlay network*, which gives each node a list of nodes it can talk to.
+******** NOTE: With overlay networks, the nodes are typically software processes.
+******** Each node in an overlay system should be connected (there's a path in the graph between any two nodes).
+******** If the list is well-defined (an algorithm or hardcoded), then it uses an *structured overlay.*
+******** If the list is random, then it uses an *unstructured overlay.*
+******** Example of an overlay system: P2P connections (torrenting).
+***** 
+*** 1.2 How do I design a distributed system?
+** Thoughts

@@ -4,7 +4,7 @@
 The CLI (command line interface) of aggiescript.  The 'main' function.
 """
 from pathlib import Path
-import pprint
+import pprinterrint
 import click
 
 from aggiestack.config_io import (import_hardware_config, import_image_config,
@@ -52,21 +52,7 @@ def config(hardware, images, flavor):
 @click.option('--images', default='', help='')
 @click.option('--flavor', default='', help='')
 def show(hardware, images, flavor):
-    if hardware != '':
-        (success, data, err_msg) = load_state(HARDWARE_FILE)
-        cli_input = 'aggiestack show --hardware'
-        log_str = None
-        if not success:
-            click.echo(err_msg, err=True)
-            log_str = "Failure: " + cli_input
-        else:
-            # TODO: Need a better printer
-            pp = pprint.PrettyPrinter(indent=4)
-            pp.pprint(data)
-            log_str = "Success: " + cli_input
-
-        with LOGFILE.open('a+') as log:
-            log.write(log_str)
+    pass
     
 cli.add_command(config)
 cli.add_command(show)

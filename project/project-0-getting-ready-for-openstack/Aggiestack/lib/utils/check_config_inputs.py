@@ -56,7 +56,7 @@ def _check_file_structure(lines):
     # do the number of machines match up?
     num_machines = int(lines[0])
     if len(lines)-1 != num_machines:
-        error_message = ("First line (number of machine configs) does not",
+        error_message = ("First line (number of machine configs) does not "
                          "match the length of the file (machine configs).\n")
         return (False, error_message)
 
@@ -79,8 +79,8 @@ def _check_term_types(line, term_schema):
     terms = line.split() # split by whitespace
 
     if len(terms) != len(term_schema):
-        error_message = ("Invalid number of terms.  ",
-                         "Expected {} terms.".format(len(term_schema)))
+        error_message = ("Invalid number of terms [{}].  ".format(len(terms))
+                         + "Expected [{}] terms.".format(len(term_schema)))
         return (False, error_message)
 
     for index, term in enumerate(terms):
@@ -106,9 +106,9 @@ def check_hardware_config_file(file_lines):
     that much memory.
     """
     # check that the file structure is valid
-    file_check_results = _check_file_structure(file_lines)
-    if file_check_results[0] is False:
-        return (False, file_check_results[1]) # second elem is the error msg
+    (valid_file, err_msg) = _check_file_structure(file_lines)
+    if valid_file is False:
+        return (False, err_msg)
 
     # check each machine config line
     machines = file_lines[1:]
@@ -119,9 +119,9 @@ def check_hardware_config_file(file_lines):
                            TermType.NUM]     # Number of virtual cores (VCPUs)
 
     for line, machine in enumerate(machines): # line is line number - 2
-        results = _check_term_types(machine, hardware_term_types)
-        if results[0] is False:
-            error_message = "In line {}:\n".format(line + 2) + results[1]
+        (is_term, err_msg) = _check_term_types(machine, hardware_term_types)
+        if is_term is False:
+            error_message = "In line {}:\n".format(line + 2) + err_msg
             return (False, error_message)
 
     return (True, "Hardware configuration file successfully parsed.")
@@ -134,9 +134,9 @@ def check_image_config_file(file_lines):
     the image file actually exists, or even if the path exists.
     """
     # check that the file structure is valid
-    file_check_results = _check_file_structure(file_lines)
-    if file_check_results[0] is False:
-        return (False, file_check_results[1]) # second elem is the error msg
+    (is_valid, err_msg) = _check_file_structure(file_lines)
+    if is_valid is False:
+        return (False, err_msg)
 
     # check each machine config line
     machines = file_lines[1:]
@@ -144,9 +144,11 @@ def check_image_config_file(file_lines):
                         TermType.STRING] # image file path
 
     for line, machine in enumerate(machines): # line is line number - 2
-        results = _check_term_types(machine, image_term_types)
-        if results[0] is False:
-            error_message = "In line {}:\n".format(line + 2) + results[1]
+        (is_term, err_msg) = _check_term_types(machine, image_term_types)
+        if is_term is False:
+            print(type(err_msg))
+            print(err_msg)
+            error_message = "In line {}:\n".format(line + 2) + err_msg
             return (False, error_message)
 
     return (True, "Image configuration file successfully parsed.")
@@ -159,9 +161,9 @@ def check_flavor_config_file(file_lines):
     the image file actually exists, or even if the path exists.
     """
     # check that the file structure is valid
-    file_check_results = _check_file_structure(file_lines)
-    if file_check_results[0] is False:
-        return (False, file_check_results[1]) # second elem is the error msg
+    (is_valid, err_msg) = _check_file_structure(file_lines)
+    if is_valid is False:
+        return (False, err_msg)
 
     # check each machine config line
     machines = file_lines[1:]
@@ -171,9 +173,9 @@ def check_flavor_config_file(file_lines):
                         TermType.NUM]    # number of virtual cores (VCPUs)
 
     for line, machine in enumerate(machines): # line is line number - 2
-        results = _check_term_types(machine, image_term_types)
-        if results[0] is False:
-            error_message = "In line {}:\n".format(line + 2) + results[1]
+        (is_term, err_msg) = _check_term_types(machine, image_term_types)
+        if is_term is False:
+            error_message = "In line {}:\n".format(line + 2) + err_msg
             return (False, error_message)
 
     return (True, "Flavor configuration file successfully parsed.")
