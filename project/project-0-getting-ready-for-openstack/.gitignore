@@ -1,1 +1,7 @@
 .cache/
+.vscode/
+
+# temporary files created by aggiestack.py CLI
+.aggiestack/
+    
+    
