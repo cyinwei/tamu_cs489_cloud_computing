@@ -2,14 +2,14 @@
 Tests our import state function, which reads in a file, parses it, and writes it
 to our state file.
 """
-from Aggiestack.lib.config_io import (import_hardware_config,
-                                      import_image_config,
-                                      import_flavor_config)
-from Aggiestack.lib.utils.io_helpers import load_state, read_config_file
-from Aggiestack.lib.utils.check_config_inputs import (check_hardware_config_file,
-                                                      check_image_config_file,
-                                                      check_flavor_config_file)
-from Aggiestack.lib.settings import HARDWARE_KEYS, IMAGE_KEYS, FLAVOR_KEYS
+from lib.config_io import (import_hardware_config,
+                           import_image_config,
+                           import_flavor_config)
+from lib.utils.io_helpers import load_state, read_config_file
+from lib.utils.check_config_inputs import (check_hardware_config_file,
+                                           check_image_config_file,
+                                           check_flavor_config_file)
+from lib.settings import HARDWARE_KEYS, IMAGE_KEYS, FLAVOR_KEYS
 from tests import FIXTURES_DIR, TEST_JSON
 
 def test_import_hardware():

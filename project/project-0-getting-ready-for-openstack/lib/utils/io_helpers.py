@@ -14,8 +14,6 @@ def parse_config_line(line, keys):
 
     config = {}
     for i, key in enumerate(keys):
-        print(i)
-        print(key)
         value = None
 
         # certain keys (below) are definitely numbers
@@ -61,7 +59,7 @@ def write_state(data, output_path):
     Writes a dict (data) as a JSON file with pathlib.Path (output)
     """
     # wipes old state if it exists
-    if output_path.exists():
+    if output_path.exists() is True:
         if output_path.is_dir():
             err_msg = "Error: {} is a directory, can't overwrite it".format(output_path)
             return (False, err_msg)
@@ -69,10 +67,14 @@ def write_state(data, output_path):
 
     # write new state
     try:
+        # create file if it doesn't exist
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output_path.touch(exist_ok=True)
+        
         with output_path.open('w+') as out:
             json.dump(data, out)
     except IOError as io_e:
-        err_msg = "IOError: [{}], {}".format(io_e.errno, io_e.strerror)
+        err_msg = "In write_state(): IOError: [{}], {}".format(io_e.errno, io_e.strerror)
         return (False, err_msg)
 
     return (True, 'success')
@@ -86,6 +88,6 @@ def load_state(input_path):
             data = json.load(json_file)
             return (True, data, 'success')
     except IOError as io_e:
-        err_msg = "IOError: [{}], {}".format(io_e.errno, io_e.strerror)
+        err_msg = "In load_state(): IOError: [{}], {}".format(io_e.errno, io_e.strerror)
         return (False, {}, err_msg)
         

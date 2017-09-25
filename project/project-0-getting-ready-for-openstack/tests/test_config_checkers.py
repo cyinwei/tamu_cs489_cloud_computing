@@ -2,7 +2,7 @@
 from pathlib import Path
 import pytest
 
-from Aggiestack.lib.utils.check_config_inputs import (
+from lib.utils.check_config_inputs import (
     check_hardware_config_file,
     check_image_config_file,
     check_flavor_config_file

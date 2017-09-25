@@ -3,5 +3,7 @@
 
 # temporary files created by aggiestack.py CLI
 .aggiestack/
-    
-    
+aggiestack-log.txt   
+
+# temporary files created by test/
+test.json

@@ -1,7 +1,9 @@
 """
 Tests our load and save state functions from Aggiestack.lib.utils.io_helpers.
 """
-from Aggiestack.lib.utils.io_helpers import load_state, write_state
+from lib.utils.io_helpers import load_state, write_state
+from lib.display import get_table
+from lib.settings import FLAVOR_KEYS
 from tests import FLAVOR_JSON, TEST_JSON
 from tests.fixtures.fixtures import IMAGES_DICT
 
@@ -12,6 +14,7 @@ def test_load_state(path=FLAVOR_JSON):
     (success, data, err_msg) = load_state(path)
     print(err_msg)
 
+    print(get_table(data, FLAVOR_KEYS))
     assert success is True
     # just test one value to ensure we loaded the json
     assert data['large']['vcpu'] == 4

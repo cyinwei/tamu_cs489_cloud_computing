@@ -6,11 +6,11 @@ as a dict.
 
 import pprint
 
-from Aggiestack.lib.utils.io_helpers import read_config_file
-from Aggiestack.lib.settings import (
+from lib.utils.io_helpers import read_config_file
+from lib.settings import (
     HARDWARE_KEYS, IMAGE_KEYS, FLAVOR_KEYS
 )
-from Aggiestack.lib.utils.check_config_inputs import (
+from lib.utils.check_config_inputs import (
     check_hardware_config_file,
     check_image_config_file,
     check_flavor_config_file
