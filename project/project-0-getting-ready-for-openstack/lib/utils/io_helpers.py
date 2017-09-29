@@ -43,7 +43,7 @@ def read_config_file(path, config_keys, check_fn):
     # check if the file format is good
     (success, check_error_msg) = check_fn(lines)
     if not success:
-        err_msg = "Error: In file [{}]: ".format(path) + check_error_msg
+        err_msg = "Error: In file [{}]: ".format(path) + '\n'+ check_error_msg
         return (False, {}, err_msg)
 
     # read the file

@@ -88,25 +88,7 @@ def get_table(data, keys, translations=None):
 
     return '\n'.join(formatted_lines)
 
-def display_hardware(state_path=HARDWARE_FILE, keys=HARDWARE_KEYS):
-    (success, data, err_msg) = load_state(state_path)
-
-    if success is False:
-        return (False, err_msg)
-
-    else:
-        return (True, get_table(data, keys))
-
-def display_image(state_path=IMAGE_FILE, keys=IMAGE_KEYS):
-    (success, data, err_msg) = load_state(state_path)
-
-    if success is False:
-        return (False, err_msg)
-
-    else:
-        return (True, get_table(data, keys))
-
-def display_flavor(state_path=FLAVOR_FILE, keys=FLAVOR_KEYS):
+def display(state_path, keys):
     (success, data, err_msg) = load_state(state_path)
 
     if success is False:

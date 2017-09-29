@@ -121,7 +121,7 @@ def check_hardware_config_file(file_lines):
     for line, machine in enumerate(machines): # line is line number - 2
         (is_term, err_msg) = _check_term_types(machine, hardware_term_types)
         if is_term is False:
-            error_message = "In line {}:\n".format(line + 2) + err_msg
+            error_message = "Syntax Error: In line {}:\n".format(line + 2) + err_msg
             return (False, error_message)
 
     return (True, "Hardware configuration file successfully parsed.")
@@ -146,8 +146,6 @@ def check_image_config_file(file_lines):
     for line, machine in enumerate(machines): # line is line number - 2
         (is_term, err_msg) = _check_term_types(machine, image_term_types)
         if is_term is False:
-            print(type(err_msg))
-            print(err_msg)
             error_message = "In line {}:\n".format(line + 2) + err_msg
             return (False, error_message)
 
