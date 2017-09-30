@@ -3,6 +3,8 @@
 * Time Spent
   I definitely spent more than 20 hours, probably somewhere around 30-40 hours.  Rewrote some code so it would be easier to reread and test.  I'll time myself next time.
 
+  I also didn't commit that often, commiting only when I finished a big feature... I definitely worked throughout the week.  Need to commit more often.
+
 ** Reasons
    I was a psuedo-beginner at Python.  I used specific tools (Jupyter notebooks, pandas + matploblib + sklearn), but I didn't actually write much code in the language.  That changed in this project.  I learned how to create packages, how to do unit testing with =pytest=, using =click= to create modular CLIs, and using the standard library (I/O with Path, JSON, exceptions).  I feel pretty proud of the code I've written.
 
