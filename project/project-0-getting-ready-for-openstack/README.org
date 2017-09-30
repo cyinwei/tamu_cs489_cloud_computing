@@ -41,3 +41,9 @@
    #+BEGIN_SRC bash
    aggiestack.py --help
    #+END_SRC
+
+* Sources
+  - The [[http://click.pocoo.org/5/][click documentation]] helped a ton.  Click is a command line interface builder in python.  This intro [[https://kushaldas.in/posts/building-command-line-tools-in-python-with-click.html][blog post]] convinced me to use it.
+  - The Python3 documentation, specifically on =pathlib= and on file handling.
+  - Vscode python, specifically using =pylint= and googling its suggestions.  (When to use =is= vs ~==~, why use ~with~ when opening files, etc.)
+  - Stackoverflow for answers from Google.

@@ -17,9 +17,9 @@ from lib.settings import (LOGFILE, ADMIN_HARDWARE_FILE, HARDWARE_FILE,
 def _log(success, command):
     log_str = None
     if success is True:
-        log_str = 'Success: ' + command + '\n'
+        log_str = 'SUCCESS: ' + command + '\n'
     else:
-        log_str = 'Failure: ' + command + '\n'
+        log_str = 'FAILURE: ' + command + '\n'
     with LOGFILE.open('a+') as log: # + is create file if not exist
         log.write(log_str)
 
@@ -178,10 +178,13 @@ def show_all(ctx):
     success = hw_success and im_success and fl_success
     # display errors first, then data
     if success is True:
-        click.echo("Available configurations:")
+        click.echo("Available configurations:\n")
         click.echo("Hardware:")
-        click.echo(hw_data)
+        click.echo(hw_data + '\n')
         click.echo("Images")
+        click.echo(im_data + '\n')
+        click.echo("Flavors")
+        click.echo(fl_data)
 
     else:
         click.echo('Error in displaying all configs:')
@@ -219,10 +222,11 @@ def can_host(ctx, names):
     Check to see if [machine name] can host a [flavor] configuration.
     """
     (machine_name, flavor) = names
-    cli_input = "{} {} can_host {} {}".format(ctx.parent.info_name,
-                                              ctx.info_name,
-                                              machine_name,
-                                              flavor)
+    cli_input = "{} {} {} {} {}".format(ctx.parent.parent.info_name,
+                                                 ctx.parent.info_name,
+                                                 ctx.info_name,
+                                                 machine_name,
+                                                 flavor)
     (success, can_handle, msg) = can_hardware_handle_flavor(machine_name, flavor)
     if success is True:
         # the msg already has our contents
