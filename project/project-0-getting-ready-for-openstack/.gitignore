@@ -6,4 +6,8 @@
 aggiestack-log.txt   
 
 # temporary files created by test/
-test.json
+tests/test.json
+
+# env files created by setuptools
+aggiestack.egg-info/
+venv/

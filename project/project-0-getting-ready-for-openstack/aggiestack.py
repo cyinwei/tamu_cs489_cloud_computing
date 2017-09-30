@@ -9,6 +9,7 @@ import click
 from lib.config_io import (import_hardware_config, import_image_config,
                            import_flavor_config, create_admin_hardware_state)
 from lib.display import display
+from lib.admin import can_hardware_handle_flavor
 from lib.settings import (LOGFILE, ADMIN_HARDWARE_FILE, HARDWARE_FILE,
                           IMAGE_FILE, FLAVOR_FILE, HARDWARE_KEYS, IMAGE_KEYS,
                           FLAVOR_KEYS)
@@ -38,7 +39,8 @@ def cli():
 @click.option('--flavors', default='', help='Configure the flavor sizes.')
 def config(ctx, hardware, images, flavors):
     """
-    Import a configuration file.
+    Import a configuration file.  NOTE: Importing a hardware file also resets
+    the admin hardware file.
     """
     cli_input_base = "{} {} ".format(ctx.parent.info_name,
                                      ctx.info_name)
@@ -48,6 +50,11 @@ def config(ctx, hardware, images, flavors):
         (success, err_msg) = import_hardware_config(path)
         if success is True:
             # don't print anything, just log
+            (ad_s, ad_err_msg) = create_admin_hardware_state(HARDWARE_FILE,
+                                                             ADMIN_HARDWARE_FILE)
+            if ad_s is False:
+                click.echo("Error: Couldn't create admin state... Reason:")
+                click.echo(ad_err_msg)
             _log(True, cli_input)
         else:
             click.echo("Error: couldn't import hardware settings.  Reasons:")
@@ -190,8 +197,49 @@ def show_all(ctx):
 
     _log(success, cli_input)
 
+@click.group()
+def admin():
+    """
+    Check if we can allocate hardware resources.
+    """
+    pass
+
+@click.group('show')
+def admin_show():
+    """
+    Displays admin configurations [just hardware right now].
+    """
+    pass
+
+@click.command()
+@click.argument('names', nargs=2)
+@click.pass_context
+def can_host(ctx, names):
+    """
+    Check to see if [machine name] can host a [flavor] configuration.
+    """
+    (machine_name, flavor) = names
+    cli_input = "{} {} can_host {} {}".format(ctx.parent.info_name,
+                                              ctx.info_name,
+                                              machine_name,
+                                              flavor)
+    (success, can_handle, msg) = can_hardware_handle_flavor(machine_name, flavor)
+    if success is True:
+        # the msg already has our contents
+        click.echo(str(can_handle) + ': ' +  msg)
+    else:
+        click.echo("Error: Cannot check if hardware can host flavor.  Reason:")
+        click.echo(msg)
+    _log(success, cli_input)
+
 cli.add_command(config)
 cli.add_command(show)
+cli.add_command(admin)
+
+admin_show.add_command(show_hardware)
+
+admin.add_command(admin_show)
+admin.add_command(can_host)
 
 show.add_command(show_hardware)
 show.add_command(show_images)

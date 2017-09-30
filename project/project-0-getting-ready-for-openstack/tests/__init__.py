@@ -5,6 +5,8 @@ from pathlib import Path
 
 FIXTURES_DIR = Path(__file__).parent / 'fixtures'
 FLAVOR_JSON = FIXTURES_DIR / 'success' / 'flavor-config.json'
+ADMIN_JSON = FIXTURES_DIR / 'success' / 'hardware.json'
+FLAVOR_TXT = FIXTURES_DIR / 'success' / 'flavor-config.txt'
 TEST_JSON = Path(__file__).parent / 'test.json'
 
 def read_file(path):

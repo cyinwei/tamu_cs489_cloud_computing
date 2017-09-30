@@ -48,7 +48,7 @@ def create_admin_hardware_state(input_p=HARDWARE_FILE,
     """
     (r_success, data, err_msg) = load_state(input_p)
     if r_success is False:
-        return (False, 'Error in creating admin hardware state: ' + err_msg)
+        return (False, 'Error in creating admin hardware state:: ' + err_msg)
     (w_success, err_msg) = write_state(data, output_p)
     if w_success is False:
         return (False, 'Error in creating admin hardware state: ' + err_msg)

@@ -70,7 +70,7 @@ def write_state(data, output_path):
         # create file if it doesn't exist
         output_path.parent.mkdir(parents=True, exist_ok=True)
         output_path.touch(exist_ok=True)
-        
+
         with output_path.open('w+') as out:
             json.dump(data, out)
     except IOError as io_e:
