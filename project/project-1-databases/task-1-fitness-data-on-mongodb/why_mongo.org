@@ -1,1 +1,26 @@
-#+TITLE: AggieFit: Why choose MongoDB over a RDBMS?
+#+TITLE: AggieFit: MongoDB or RDBMS?
+For AggieFit, MongoDB is a better fit than a tradition relational database management system (RDBMS) for the following reasons:
+- Easier to scale with more data
+- Easier to handle replication for better availability
+- Easier to change the data structure or schema for faster development
+
+In all, MongoDB gives our development team an easier and faster experience, saving Aggies Forever money in the long term.
+
+* Scale
+If we use a relational database, the amount of data will become difficult to deal with.  We could buy a more expensive server, which doesn't scale all that well and is extremely expensive.  That is known as vertical scaling and it doesn't scale all that well.  Instead, the standard solution today is to split the data over many machines, or sharding.  This is known as horizontal scaling.
+
+However, in most relational databases, sharding is not well supported.  It can be difficult or is in a development stage.  Postgres, for example, is building sharding into its next release.
+
+Meanwhile, sharding is a first class citizen in MongoDB.  It was built with sharding in mind, having a system to allocate data across shards.
+
+That means as AggieFit needs more data, MongoDB increasingly becomes a better choice, since it's easier to do horizontal scaling with.
+
+* Replication
+No matter what database we use, if we store the database on one server and that server goes down, then so does our data and our service.  If we want our AggieFit portal to be highly available, then we need some sort of replication.  That way, if the single server goes down, the backup server(s) will provide the data.  Of course, that adds complexity since we have to keep all the replicas in sync.
+
+In relational databases today, most solutions offer the simplest form of replication with master-slave replication.
+M
+
+MongoDB has a much more complex and well supported form of replication, with 
+
+* Schemaless 
