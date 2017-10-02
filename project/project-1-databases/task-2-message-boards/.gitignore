@@ -1,0 +1,7 @@
+# vscode, MacOS, other non project system files
+.vscode/
+.DS_Store
+
+# development directories and files
+venv/
+

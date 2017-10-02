@@ -3,8 +3,9 @@
 __pycache__/
 *.py[cod]
 
-# vs code
+# editors: vscode, emacs
 .vscode
+.#*
 
 # OSX file systems
 .DS_Store
