@@ -3,12 +3,27 @@ Implements the prototype for the AggieFit messsage board.
 """
 
 import signal
+import sys
 
 from pymongo import MongoClient
 import redis
 
 from lib import read, write, listen
 from config import redis_config, mongo_config, mongo_db_name
+
+# global objects so our handler can close them
+# NOTE: redis-py and pymongo's connections disconnect as they go out of scope
+listener_thread = None
+
+def sigint_handler(signal, frame):
+    global listener_thread
+    if listener_thread is None:
+        sys.exit(0)
+    print('\nCleaning up listener thread... ')
+    listener_thread.stop()
+    listener_thread.join()
+    print('Done. Bye!')
+    sys.exit(0)
 
 help_str = ("AggieFit message board commands:\n"
             "help:            show this message\n"
@@ -22,9 +37,8 @@ def loop_sh(mongo_db, redis_client, stop_words=('q', 'quit', 'exit')):
     """
     The shell of the AggieFit message board.  Loops until we quit.
     """
-
+    global listener_thread
     topic = None
-    listener_thread = None
     redis_pubsub = redis_client.pubsub()
 
     prompt = "> "
@@ -50,15 +64,21 @@ def loop_sh(mongo_db, redis_client, stop_words=('q', 'quit', 'exit')):
             print(help_str)
         elif input_str == 'read':
             if not topic:
-                print ('Error: Need a selected topic to read from.')
+                print('Error: Need a selected topic to read from.')
             else:
                 print(read(mongo_db, topic))
         elif input_str == 'listen':
             if not topic:
-                print ('Error: Need a selected topic to listen to.')
+                print('Error: Need a selected topic to listen to.')
+            elif listener_thread is not None:
+                print('Error: Already listening to this topic.')
             else:
                 listener_thread = listen(redis_pubsub, topic)
                 print("Type \'quit\' to stop listening.")
+        elif input_str == 'write':
+            print('Error: Needs a message (like \'write: hi\')')
+        elif input_str == 'select':
+            print('Error: Needs a topic name (like \'select: test\')')
         elif input_str[:7] == 'select ':
             if listener_thread is not None:
                 # if we have a listener thread, then we already have a topic
@@ -69,10 +89,10 @@ def loop_sh(mongo_db, redis_client, stop_words=('q', 'quit', 'exit')):
                 prompt = "({}) > ".format(topic)
         elif input_str[:6] == 'write ':
             if not topic:
-                print ('Need a selected topic to write to.')
+                print('Need a selected topic to write to.')
             else:
                 write(mongo_db, redis_client, topic, input_str[6:].strip())
-                print('Written.')
+                print('[written]')
 
         # loop again
         input_str = input(prompt)
@@ -105,5 +125,6 @@ def main():
     mongo_client.close()
 
 if __name__ == "__main__":
+    signal.signal(signal.SIGINT, sigint_handler)
     main()
 

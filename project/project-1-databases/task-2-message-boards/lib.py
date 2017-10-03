@@ -62,7 +62,7 @@ def _listen_handler(message):
     Redis PubSub handler.  Takes in a incoming subscription message, formats
     it, and prints it to the screen.
     """
-    print_str = "\n(listen) => {}"
+    print_str = "(listen) => {}"
     print(print_str.format(message['data'].decode('utf-8')))
     # we write in utf 8 by default in python
 
@@ -89,7 +89,6 @@ def listen(redis_pubsub, channel, stop_word='quit'):
     if channel is False:
         return
 
-    format_str = "(listen) => {}"
     redis_pubsub.subscribe(**{channel: _listen_handler})
 
     thread = redis_pubsub.run_in_thread(sleep_time=0.001)

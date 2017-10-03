@@ -1,0 +1,150 @@
+#+TITLE: Project 1 Task 2: Message Boards
+#+AUTHOR: Yinwei (Charlie) Zhang
+#+SUBTITLE: Texas A&M CSCE 489-599 Cloud Computing, Autumn 2017
+
+* Introduction
+  We design and implement a simple message board using distributed databases.  I used =MongoDB= for storing the entire message board, and =Redis= for implementing the live =listen= feature.  The program was written in =Python3= using =pymongo= and =redis-py=.
+
+  Programming Checklist:
+    - Can handle select, listen, write, read without any errors.
+    - [BONUS] Can handle bad input errors.
+    - Cannot handle bad database connections (no checks, won't exit gracefully)
+
+  Paper Checklist:
+    - Architecture explanation (why)
+    - [BONUS] Consistency vs Available thoughts for the message board.
+
+* Time Spent
+  I spent around 15 hours for the project, starting on Sunday morning and ending morning night.
+  - 3 hours on Googling and reading about =Redis= and =MongoDB=, and the given instructions.
+  - 10 hours on programming 
+    - Mostly on testing and learning about python threads, sigint handlers, and redis-py pubsub, mongo wasn't bad.
+  - 2 hours on writing this report, visuals, and double checking.
+* Code (also part of Part A)
+** Installation
+*** Environment
+    I used [[https://conda.io/docs/][=conda=]] to set up my environment.  I used =python 3.6.2=, along with =pymongo= and =redis-py=.   really
+   global
+   hi
+   tashif
+   charlie
+   kobe
+   hi
+   b
+   hello
+   world
+   kobe
+   lebron
+   curry
+   kd
+   michael
+   lol
+   game boy
+   basketball is a ball
+   hello
+   kobe
+   byrant
+   lebron
+   hello
+   test
+   123See =requirements.txt= for more details.
+
+    To install, run:
+    #+NAME: conda_install_p1t2
+    #+BEGIN_SRC bash
+    conda env create -f environment.txt
+    #+END_SRC
+
+*** Program
+    Just run:
+    #+NAME: message_board
+    #+BEGIN_SRC bash
+    python message_board.py # main file
+    #+END_SRC
+   
+    Make you have connections to both MongoDB and Redis.  By default, I pointed the connections to their default localhost ports.  Check or change =config.py=.
+** Usage Example
+   #+BEGIN_SRC
+   (cc_p1_t1_dev) ➜  task-2-message-boards git:(master) ✗ python message_board.py
+   Welcome to the AggieFit message boards! (implemented by Charlie!)
+   Connecting to databases (MongoDB, Redis) ...
+   Done
+   
+   AggieFit message board commands:
+   help:            show this message
+   quit:            exit the message board (q, exit also work)
+   select <topic>:  pick the topic on the forum
+   read:            get all the messages from the selected topic
+   write <message>: write a single message to the selected topic
+   listen:          listen to the selected topic (one max)
+   
+   > read
+   Error: Need a selected topic to read from.
+   > write
+   Error: Needs a message (like 'write: hi')
+   > listen
+   Error: Need a selected topic to listen to.
+   > select test
+   (test) > read
+   hi
+   (test) > write cs-489
+   [written]
+   (test) > read
+   hi
+   cs-489
+   (test) > listen
+   Type 'quit' to stop listening.
+   (test) > (listen) => hi from another client
+   
+   (test) > quit
+   Stopped listening to topic [test]
+   (test) > quit
+   (cc_p1_t1_dev) ➜  task-2-message-boards git:(master) ✗
+   #+END_SRC
+* Part A: Architecture 
+** Architecture
+   Because the scope of the implementation is pretty small in both number of users (on localhost) and in features, I think we could've used just =MongoDB= or =Redis= for all the features.  The hardest part, the =listen()= feature, could've been done through =Redis= pubsubs or =MongoDB= tailable cursors.  I chose =Redis= for the listen feature, =MongoDB= for the read, and so we write to both.  I've also thought about if we added more features (users, session keys, paginated tables, etc), which I'll cover at the end.
+*** Current
+    #+DOWNLOADED: file:/Users/cyinwei/job/tamu/489-17-c/project/project-1-databases/task-2-message-boards/doc/architecture_simple.png @ 2017-10-02 22:33:01
+    [[file:Part A: Architecture & Code/architecture_simple_2017-10-02_22-33-01.png]]
+    After selecting the topic, there are three main features: read, write, and listen.  We use =Redis= for listen using its pubsub feature and =MongoDB= for read using its default collections.
+**** Why?
+     For listen, we have a real time, socket system.  We don't care about the history.  If the user comes late, then can use read to get the history.  Listen requires you to be already connected to listen in.
+     
+     =Redis'= pubsub system is perfect for this.  It doesn't keep any history.  It's in memory, so it's lightning fast.  Since I'm assuming the number of messages are much more than the number of connections, =Redis= shouldn't run out of memory relatively speaking.
+
+     If we use =Mongo='s tailable cursor, the history of the messages will be saved.  In that case, we're using the same =Mongo= collection for both read and listen.  Which is easy to to implement, but scales poorly, since we will so many reads to to the tail of collection at once.
+
+     I assume users who want the whole history aren't that many and want the whole history at once.  That's a perfect use case for =Mongo=, since there are that many reads or writes to the same location, as we're retrieving the whole collection.
+
+     In terms of characteristics, Redis is in memory, making it super fast but low storage.  =Mongo= is disk + memory, allowing it to store tons of data, but slows down its speed.  If don't need the storage, Redis is the better choice.  Since right now we're using a server for both Redis and Mongo (we shouldn't do that in production since Mongo will mess up Redis' efficiency through page swtiches), scaling isn't an issue.  If we want to scale, the architecture needs to be really different.
+*** When there are more features
+    In general, we want to use Redis for caching and for limited lifespan items.  These items don't take a ton of memory, but are accessed a lot relatively.  For features like user login, session keys, and a cache of the frontpage posts, Redis is a perfect fit.  Redis has a default feature called TTL (Time to Live), which will allow keys and cached posts to expire over time.
+
+    We can use =MongoDB= as a primary data store, storing the entire history of the message boards.  Since most users just want to front 100 or so posts, we will rarely ping =Mongo=, which is great, since it doesn't have best speed, but is designed with web scale in mind.
+
+    When we do scale, we will have network partitions, which will increase availability from a single node, but will decrease consistency.  See part B for more of my thoughts.
+    
+* Part B: Consistency vs Availability (Bonus)
+  When we have one node, we have absolute consistency.  That means as long as the node is up, then the data we read from the node will be consistent (accurate, up to date).  However, as soon as we split up the servers for horizontal scaling, we lose that consistency (unless we want to pay extremely high availability costs).  For example, one network partition might go down, taking down the primary node.  Then all the writes to it will disappear, or maybe the backup node has slightly outdated data since it didn't finish copying yet.
+
+  This is the CAP theorem, which states that it's impossible to have highly consistent, available, and network partitioned distributed systems all at once.  If our data is spread out over multiple shards, and one shard becomes unconnected, then we can't guarantee that we still have all the data unless we make multiple network requests for backup and wait times (lower availability).  Our backup nodes aren't guaranteed to be consistent.  However, since a single node can only be so big, if we want to scale, we need network partitions.
+
+  For AggieFit, as we scale, we're going to lose some consistency.  Maybe people listening in might lose some messages if the server goes down.  Maybe the read options returns stale or not the most recent data.  But since message boards aren't mission critical, I think we should be okay with that.
+
+  I think a looser consistency model would be fine.  Since messages can grow to be big, we need partitions when it does (not immediately).  Since they aren't that important and aren't a part of the core AggieFit product, we can lower the consistency bounds to save on hardware (less slave or replication nodes).  That way, the data is available more often, even if it might be old.
+
+* Learning Sources
+  Mongo I learned last week from the school videos, paper, and task 1.
+  - Theory
+    - Jepsen, error testing Mongo and Redis (above my current level, but really good)
+      - https://jepsen.io/analyses/mongodb-3-4-0-rc3
+      - https://aphyr.com/posts/283-jepsen-redis
+    - Redis learning?
+      - https://www.youtube.com/watch?v=jTTlBc2-T9Q&t=1698s
+    - How to use each?
+      - https://www.slideshare.net/jzawodn/living-with-sql-and-nosql-at-craigslist-a-pragmatic-approach
+      - https://stackoverflow.com/questions/5400163/when-to-redis-when-to-mongodb
+  - Code (see source code for more sources, these were the most helpful)
+    - http://api.mongodb.com/python/current/tutorial.html
+    - https://github.com/andymccurdy/redis-py

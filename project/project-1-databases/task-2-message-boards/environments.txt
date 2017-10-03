@@ -1,0 +1,33 @@
+name: charlie_p1t2
+channels:
+- defaults
+dependencies:
+- astroid=1.5.3=py36h1333018_0
+- ca-certificates=2017.08.26=ha1e5d58_0
+- certifi=2017.7.27.1=py36hd973bb6_0
+- isort=4.2.15=py36hceb2a01_0
+- lazy-object-proxy=1.3.1=py36h2fbbe47_0
+- libcxx=4.0.1=h579ed51_0
+- libcxxabi=4.0.1=hebd6815_0
+- libedit=3.1=hb4e282d_0
+- libffi=3.2.1=hd939716_3
+- mccabe=0.6.1=py36hdaeb55d_0
+- ncurses=6.0=ha932d30_1
+- openssl=1.0.2l=h57f3a61_2
+- pip=9.0.1=py36hbd95645_3
+- pylint=1.7.2=py36h2492be7_0
+- pymongo=3.4.0=py36_0
+- python=3.6.2=hd0bf7f1_15
+- readline=7.0=h81b24a6_3
+- redis=3.2.0=0
+- redis-py=2.10.5=py36_0
+- setuptools=36.5.0=py36h2134326_0
+- six=1.10.0=py36h1d5bd22_1
+- sqlite=3.20.1=h900c3b0_1
+- tk=8.6.7=hcdce994_1
+- wheel=0.29.0=py36h3597b6d_1
+- wrapt=1.10.11=py36hc29e774_0
+- xz=5.2.3=ha24016e_1
+- zlib=1.2.11=h60db283_1
+prefix: /usr/local/anaconda3/envs/cc_p1_t1_dev
+
