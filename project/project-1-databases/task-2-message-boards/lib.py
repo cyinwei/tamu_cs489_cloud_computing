@@ -1,6 +1,7 @@
 """
 Backend functions for the AggieFit message board.
 """
+import time
 import threading
 
 def read(mongodb_client, channel):
@@ -20,9 +21,13 @@ def read(mongodb_client, channel):
 
     topic = mongodb_client[channel]
     messages = topic.find()
+
+    msg_list = []
     for msg in messages:
-        print(msg)
-    return list(messages)
+        msg_list.append(msg['msg'])
+
+    messages.close()
+    return '\n'.join(msg_list)
 
 
 def write(mongodb_client, redis_client, channel, msg):
@@ -52,9 +57,20 @@ def write(mongodb_client, redis_client, channel, msg):
 
     redis_client.publish(channel, msg)
 
-class Listener(threading.Thread):
+def _listen_handler(message):
     """
-    A stoppable listener thread that relies on redis's pubsub feature.
+    Redis PubSub handler.  Takes in a incoming subscription message, formats
+    it, and prints it to the screen.
+    """
+    print_str = "\n(listen) => {}"
+    print(print_str.format(message['data'].decode('utf-8')))
+    # we write in utf 8 by default in python
+
+def listen(redis_pubsub, channel, stop_word='quit'):
+    """
+    A **non-blocking** listen() that uses redis to subscribe to a message board
+    (channel).  Requires the caller to stop listening by closing the thread.
+    Also requires the caller to clean up.
 
     Learning resources:
     Docs (on redis):
@@ -68,48 +84,13 @@ class Listener(threading.Thread):
     https://stackoverflow.com/questions/323972/is-there-any-way-to-kill-a-thread-in-python
     https://ravi.pckl.me/short/non-blocking-pubsub-in-python-and-redis/
     https://gist.github.com/jobliz/2596594
+
     """
+    if channel is False:
+        return
 
-    def __init__(self, redis_db, channel):
-        """
-        Contructs the thread, making it stoppable with an event and also
-        connects to redis as a subscriber to the channel.
-        """
-        # allow the thread to stop itself with an threading.Event()
-        super(Listener, self).__init__()
-        self.shutdown_flag = threading.Event()
+    format_str = "(listen) => {}"
+    redis_pubsub.subscribe(**{channel: _listen_handler})
 
-        # subscribe to the redis channel
-        self.channel = channel
-        self.redis = redis_db
-        self.pubsub = self.redis.pubsub()
-        self.pubsub.subscribe(channel)
-
-    def listen(self):
-        """
-        Uses redis's pubsub to print new data.
-        """
-        for item in self.pubsub.listen():
-            line = "listen[{}]: {}"
-            print(line.format(self.channel, item))
-
-    def run(self):
-        while not self.shutdown_flag.is_set():
-            self.listen()
-
-        self.pubsub.unsubscribe()
-
-def listen(redis_db, channel, quit_str='quit'):
-    """
-    A **blocking** listen() that uses redis to subscribe to a message board
-    (channel).
-
-    See the resource links from the Listener class for my learning sources.
-    """
-    listener = Listener(redis_db, channel)
-    listener.start()
-
-    input_str = input("Type {} to stop listening.".format(quit_str))
-    if input_str == quit_str:
-        listener.shutdown_flag.set()
-        listener.join()
+    thread = redis_pubsub.run_in_thread(sleep_time=0.001)
+    return thread
