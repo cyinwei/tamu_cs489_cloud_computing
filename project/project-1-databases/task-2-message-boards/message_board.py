@@ -8,15 +8,7 @@ from pymongo import MongoClient
 import redis
 
 from lib import read, write, listen
-
-redis_config = {
-    'host': 'localhost',
-    'port': 6379,
-    'db': 0,
-}
-
-mongo_config = ('localhost', 27017)
-mongo_db_name = 'message_board_721008432'
+from config import redis_config, mongo_config, mongo_db_name
 
 help_str = ("AggieFit message board commands:\n"
             "help:            show this message\n"
@@ -57,10 +49,16 @@ def loop_sh(mongo_db, redis_client, stop_words=('q', 'quit', 'exit')):
         if input_str == 'help':
             print(help_str)
         elif input_str == 'read':
-            print(read(mongo_db, topic))
+            if not topic:
+                print ('Error: Need a selected topic to read from.')
+            else:
+                print(read(mongo_db, topic))
         elif input_str == 'listen':
-            listener_thread = listen(redis_pubsub, topic)
-            print("Type \'quit\' to stop listening.")
+            if not topic:
+                print ('Error: Need a selected topic to listen to.')
+            else:
+                listener_thread = listen(redis_pubsub, topic)
+                print("Type \'quit\' to stop listening.")
         elif input_str[:7] == 'select ':
             if listener_thread is not None:
                 # if we have a listener thread, then we already have a topic
@@ -70,14 +68,17 @@ def loop_sh(mongo_db, redis_client, stop_words=('q', 'quit', 'exit')):
                 topic = input_str[7:].strip()
                 prompt = "({}) > ".format(topic)
         elif input_str[:6] == 'write ':
-            write(mongo_db, redis_client, topic, input_str[6:].strip())
-            print('Written.')
+            if not topic:
+                print ('Need a selected topic to write to.')
+            else:
+                write(mongo_db, redis_client, topic, input_str[6:].strip())
+                print('Written.')
 
         # loop again
         input_str = input(prompt)
         input_str = input_str.strip()
 
-    redis_pubsub.unsubscribe()
+    # cleanup
     redis_pubsub.close()
     return
 
@@ -92,12 +93,17 @@ def main():
     mongo_client = MongoClient(*mongo_config)
     mongo_db = mongo_client[mongo_db_name]
     redis_client = redis.StrictRedis(**redis_config)
-    print('Done')
-    print()
+    print('Done\n')
+
+    # initial help menu
     print(help_str)
 
+    # our shell, where we loop forever until the quit command
     loop_sh(mongo_db, redis_client)
+
+    # clean up
     mongo_client.close()
 
 if __name__ == "__main__":
     main()
+
