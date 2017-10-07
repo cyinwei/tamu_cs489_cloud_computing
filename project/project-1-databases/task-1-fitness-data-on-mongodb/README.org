@@ -2,28 +2,36 @@
 #+SUBTITLE: ECEN 489-599 Cloud Computing, Autumn 2017
 #+AUTHOR: Yinwei (Charlie) Zhang
 
-* Part A: Why MongoDB over a traditional Relational Database?
-For AggieFit, MongoDB is a better fit than a tradition relational database management system (RDBMS) for the following reasons:
+* Time Spent
+  I spent about 15 hours.  There was a bug where my =fitness_myUIN= collection wasn't on the =host=.  That took a bit of time to debug.  Most of the time was spend on writing the queries, learning about =MongoDB= aggregations and filters.  Some was spent on the readings from last week and this week.
+
+* Part A: Why MongoDB over a traditional Relational DB?
+  For AggieFit, MongoDB is a better fit than a tradition relational database management system (RDBMS) for the following reasons:
+  
 - Easier to scale with more data
 - Easier to change the data structure or schema for faster development
-
+  
 In all, MongoDB gives our development team an easier and faster experience, saving Aggies Forever money in the long term.
 
-* Scale
-If we use a relational database, the amount of data will become difficult to deal with.  We could buy a more expensive server, which doesn't scale all that well and is extremely expensive.  That is known as vertical scaling. Instead, the standard solution today is to split the data over many machines, or sharding.  This is known as horizontal scaling.
+** Scale
+   If we use a relational database, the amount of data will become difficult to deal with.  We could buy a more expensive server, which doesn't scale all that well and is extremely expensive.  That is known as vertical scaling. Instead, the standard solution today is to split the data over many machines, or sharding.  This is known as horizontal scaling.
 
-However, in most relational databases, sharding is not well supported.  It can be difficult or is in a development stage.  In Postgres, for example, is building sharding into its next release.
+   However, in most relational databases, sharding is not well supported.  It can be difficult implement, usually by hand, or is in a development stage.  In Postgres, for example, is building sharding into its next release.
+   
+   Meanwhile, sharding is a first class citizen in MongoDB.  It was built with sharding in mind, having a built in system to allocate data across shards.
+   
+   That means as AggieFit needs more data, MongoDB increasingly becomes a better choice, since it's easier to do horizontal scaling with.
+   
+** Schemaless
+   Relational databases typically require you to design schemas, or the columns.  It is relatively expensive to add or drop columns.  We may also need to design schemas in third normal form for fast join operations, which can be a bit complicated and time consuming.
 
-Meanwhile, sharding is a first class citizen in MongoDB.  It was built with sharding in mind, having a built in system to allocate data across shards.
+   With MongoDB, documents don't have to have strict schemas.  That means we don't have to consider schema design all that much, since we can alter the schemas on the fly.  That makes development much easier.
 
-That means as AggieFit needs more data, MongoDB increasingly becomes a better choice, since it's easier to do horizontal scaling with.
-
-* Schemaless
-Relational databases typically require you to design schemas, or the columns.  It is relatively expensive to add or drop columns.  We may also need to design schemas 
+   With our product, a document with a flexible schema is a perfect fit, since there aren't complex relationship between different entities.  We're just keep track of a single user, with the single user's fit information.  Nothing super complex.  That makes documents a better fit than relationship schemas.  This way, we can add data features really quickly, increasing developer speed.
 
 * Part B: Querying the fitness data on MongoDB
 ** Code
-   The queries are implemented in =Python3= as =query.py=.
+   The queries are implemented in =python3= as =query.py=.
 *** Installation
     I'm running =python3= (using =Pathlib= from the standard library, 3.4+) with =pymongo= installed.  I've used =conda= to set up my environment in =environment.yml=.
 
@@ -34,7 +42,7 @@ Relational databases typically require you to design schemas, or the columns.  I
 
     Otherwise just run =python 3.4+= with =pymongo= installed.
 
-    NOTE: I think for Task 2 (handed in early), my environment.txt file /might/ be a wrong for conda (I hand edited something I shouldn't have, the name).  If it doesn't work when you grade it just install =python 3.4+=, =pymongo=, and =redis-py= and you should be good for task 2.  I just tested it and it works on my laptop but... just in case.
+    NOTE: I think for Task 2 (handed in early), my environment.txt file /might/ be a wrong for conda (I hand edited something I shouldn't have, the name).  If it doesn't work when you grade it just install =python 3.4+=, =pymongo=, and =redis-py= and you should be good for task 2.  I just tested =environment.txt= for that task and it works on my laptop but... just in case.
 *** Running the queries 
     Just run =python3 query.py= (or =python query.py= if your =ENV= points to =python3=).
 
@@ -45,7 +53,7 @@ Relational databases typically require you to design schemas, or the columns.  I
 
     The problem is the field values are in strings, with wonky values like =NA= and =75min= and then just =30=.  That means the data is hard to parse.  I had to request all users with the field and than parse with =python=, or use Mongo's =forEach()= in order to do parsing.
 
-    To fix that, we can consider a stricter schema kind of like a relational databse.  We can use [[http://mongoosejs.com/][=Mongoose=]], which lets us do fixed schemas, making =activityGoal= like an int so we don't have to do parsing.
+    To fix that, we can consider a stricter schema kind of like a relational databse.  We can use [[http://mongoosejs.com/][=Mongoose=]], which lets us do fixed schemas, making =activityGoal= like an =int= so we don't have to do parsing.
 *** Consider an unique index for the =uid= field
     It's pretty apparent that the =uid= field is used for employee identity.  That means we can't have repeated =uids= or else that means we have two employees with the same =uid=, breaking the system.  Or a document without an =uid= meaning we can't connect document to an actual employee.
 
@@ -58,6 +66,10 @@ Relational databases typically require you to design schemas, or the columns.  I
 
     The more replicas we have, the more available the data is, since more nodes would have to fail.  We would ideally separate the nodes across different datacenters in different locations.  The tradeoff is latency, since the replicas need to share data to be in sync with one another.
 *** Scalability, solved with sharding
+    If we run of of space on a single node, we can use more than one server by sharding.  Sharding means we keep separate chunks of data on each node.  So the first node keeps the first half of the user based on =uid= and the second node keeps the second half.  We can further shard as we need more data.  This is horizontal scaling.
 
+    Sharding makes some operations, particular aggregation ones, more expensive as a tradeoff.  In addition, if you want high availability, you need replicas for each of the shards, creating a multiplicative effect for extra nodes.
 ** How do we configure data across multiple servers?
-   It depends on how much data we have.
+   It depends on how much data we have.  If we're running out room, we need to shard to scale.  Again, we shard by =uid= since there aren't any other relationships in the data.  It's just an individual user and his or her fitness data.
+
+   For reliability, it depends on what our employees expect.  If everyone is invested in AggieFit and it is a /mature/ product, we'd want high availability.  That means keeping replicas.  And having information be eventually consistent, and not immediately consistent in the case of using the replica.  For the exact number of replicas per shard, I don't know.  It depends on the availability guidelines set by management.
