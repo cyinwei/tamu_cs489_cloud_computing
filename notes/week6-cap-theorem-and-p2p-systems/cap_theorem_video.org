@@ -1,0 +1,26 @@
+#+TITLE: CAP Theorem Introduction
+
+* What is the CAP Theorem?
+  A distributed data store can only pick two out of Consistency, Availability, and Partition Tolerance (CAP).  We can't have a have a /distributed/ data store with all three properties.
+* What is Consistency?
+  Is our data what we expect it to be?  Or is it out of date?  Or even worse?
+
+  A /consistent/ system is real life.  Take a piece paper and write your first name.  Look at it.  Then write your last name.  Then look at it.  My paper should say 'Charlie Zhang'.  It's what you expect when you use your local computer.  When I write this =org= document, I expect when that the next time I open it, I have the file I've written.
+
+  A /inconsistent/ system doesn't guarantee that your reads matches your writes.  I might read an out of date file on a distributed system, because the node I'm connecting to doesn't have the latest updates.  Or worse, like corrupted data.  Like the Dewey defeats Truman newspaper.  Truman actually won, but when I 'read' the newspaper, I got inaccurate information.
+
+  TLDR: Every successful read recieves the most recent write.
+** When is consistency important?
+   When the data represents something valuable.
+
+   Imagine you're keeping track of a bank's financial data.  If the data store isn't consistent, then a person's 'real life' money might be compromised.  We might incorrectly overdraw them, or they think they have more money that they really do, and so on.  Especially when more than one person uses that account.
+* What is Availability?
+  Is our data available?  When I do a read, do I get the data?  Or do I just get an error message?
+
+  An /available/ system is real life.  Take a piece of paper.  Look at it.  Close your eyes.  When you open them, the paper is still there right?  An /unavailable/ system would be a TV screen the flickers on and off.
+
+  TLDR: Every request to a /non-failing/ node results in a response.
+** When is availability important?
+   Actually, availability is the most important property in most distributed system design.  Since code = data + algorithms, most programs or web services or apps will break without data.  How useful is Twitter without the internet?  Versus Twitter with just data a day late?  That's why most apps cache their data :).
+* What is Partition Tolerance?
+  Does the system have more than one node (computer)?  That means 

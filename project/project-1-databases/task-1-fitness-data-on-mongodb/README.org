@@ -1,0 +1,63 @@
+#+TITLE: Project 1 Task 1: Fitness Data on MongoDB
+#+SUBTITLE: ECEN 489-599 Cloud Computing, Autumn 2017
+#+AUTHOR: Yinwei (Charlie) Zhang
+
+* Part A: Why MongoDB over a traditional Relational Database?
+For AggieFit, MongoDB is a better fit than a tradition relational database management system (RDBMS) for the following reasons:
+- Easier to scale with more data
+- Easier to change the data structure or schema for faster development
+
+In all, MongoDB gives our development team an easier and faster experience, saving Aggies Forever money in the long term.
+
+* Scale
+If we use a relational database, the amount of data will become difficult to deal with.  We could buy a more expensive server, which doesn't scale all that well and is extremely expensive.  That is known as vertical scaling. Instead, the standard solution today is to split the data over many machines, or sharding.  This is known as horizontal scaling.
+
+However, in most relational databases, sharding is not well supported.  It can be difficult or is in a development stage.  In Postgres, for example, is building sharding into its next release.
+
+Meanwhile, sharding is a first class citizen in MongoDB.  It was built with sharding in mind, having a built in system to allocate data across shards.
+
+That means as AggieFit needs more data, MongoDB increasingly becomes a better choice, since it's easier to do horizontal scaling with.
+
+* Schemaless
+Relational databases typically require you to design schemas, or the columns.  It is relatively expensive to add or drop columns.  We may also need to design schemas 
+
+* Part B: Querying the fitness data on MongoDB
+** Code
+   The queries are implemented in =Python3= as =query.py=.
+*** Installation
+    I'm running =python3= (using =Pathlib= from the standard library, 3.4+) with =pymongo= installed.  I've used =conda= to set up my environment in =environment.yml=.
+
+    To install with conda run:
+    #+BEGIN_SRC bash
+    conda env create -f environment.yml 
+    #+END_SRC
+
+    Otherwise just run =python 3.4+= with =pymongo= installed.
+
+    NOTE: I think for Task 2 (handed in early), my environment.txt file /might/ be a wrong for conda (I hand edited something I shouldn't have, the name).  If it doesn't work when you grade it just install =python 3.4+=, =pymongo=, and =redis-py= and you should be good for task 2.  I just tested it and it works on my laptop but... just in case.
+*** Running the queries 
+    Just run =python3 query.py= (or =python query.py= if your =ENV= points to =python3=).
+
+    NOTE: The queries are designed to be re-runnable, doing upserts instead of straight inserts when writing the data in WQ1.
+** Design improvements on current MongoDB collection
+*** Stricter schemas for certain fields (activityGoal specifically)
+    One immediate problem we run into is RQ3, when we're trying to filter when =activityGoal= is greater than 60 minutes.
+
+    The problem is the field values are in strings, with wonky values like =NA= and =75min= and then just =30=.  That means the data is hard to parse.  I had to request all users with the field and than parse with =python=, or use Mongo's =forEach()= in order to do parsing.
+
+    To fix that, we can consider a stricter schema kind of like a relational databse.  We can use [[http://mongoosejs.com/][=Mongoose=]], which lets us do fixed schemas, making =activityGoal= like an int so we don't have to do parsing.
+*** Consider an unique index for the =uid= field
+    It's pretty apparent that the =uid= field is used for employee identity.  That means we can't have repeated =uids= or else that means we have two employees with the same =uid=, breaking the system.  Or a document without an =uid= meaning we can't connect document to an actual employee.
+
+    To fix that, we can make the =uid= field an unique index, preventing repeated =uids=.  Note that with an unique index, we can have /one/ document with a null (or nonexistent) =uid= key, so we can just insert a dummy document in without a =uid=.
+* Part C: Storing data on one server or many 
+** What could go wrong with storing data on just one server?
+   There are two fundamental problems: availability and scale.
+*** Availability, solved with replication
+    If we store the database on one server and that server goes down, then so does our data and our service.  If we want our AggieFit portal to be highly available, then we need some sort of replication.  That way, if the single server goes down, the backup server(s) will provide the data.  Of course, that adds complexity since we have to keep all the replicas in sync.
+
+    The more replicas we have, the more available the data is, since more nodes would have to fail.  We would ideally separate the nodes across different datacenters in different locations.  The tradeoff is latency, since the replicas need to share data to be in sync with one another.
+*** Scalability, solved with sharding
+
+** How do we configure data across multiple servers?
+   It depends on how much data we have.

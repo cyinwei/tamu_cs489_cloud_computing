@@ -1,32 +1,17 @@
 """
-queries
+Implements the MongoDB queries requested in Part B of Project 1 Task 1.
+
+We first do two writes to the collection (fitness_myUIN).  See functions wq1,
+w12.  Then we do some reads (and analysis with aggregations).  See functions
+rq1 to rq4.
 """
 
-from pathlib import Path
-import json
 import re
-from bson.code import Code
+import pprint
 from pymongo import MongoClient, UpdateOne
+from config import HOST, DB, COLLECTION, DUMMY_FITNESS_DATA, USER_1001_DATA
 
-host = "34.233.78.56"
-db = "fitness_721008432"
-collection = "fitness_721008432"
-test_collection = "test"
-
-dummy_fitness_file = Path('data/dummy-fitness.json')
-user_1001_file = Path('data/user1001-new.json')
-
-with dummy_fitness_file.open('r') as f:
-    dummy_fitness_data = json.load(f)
-with user_1001_file.open('r') as f:
-    user_1001_data = json.load(f)
-
-client = MongoClient(host)
-
-my_db = client[db]
-my_collection = my_db[test_collection]
-
-def wq1(mongod_collection, batch_data=dummy_fitness_data):
+def wq1(mongod_collection, batch_data=DUMMY_FITNESS_DATA):
     """
     Upserts the data from dummy_fitness data.
     """
@@ -39,10 +24,8 @@ def wq1(mongod_collection, batch_data=dummy_fitness_data):
 
     return mongod_collection.bulk_write(upserts)
 
-result_wq1 = wq1(my_collection)
-# print(result.bulk_api_result)
 
-def wq2(mongod_collection, data=user_1001_data):
+def wq2(mongod_collection, data=USER_1001_DATA):
     """
     Updates the data from the user1001 data.
     """
@@ -51,9 +34,6 @@ def wq2(mongod_collection, data=user_1001_data):
     payload_data = {'$set': data}
 
     return mongod_collection.update_one(query, payload_data)
-
-result_wq2 = wq2(my_collection)
-# print(result_wq2.matched_count)
 
 def rq1(mongod_collection):
     """
@@ -65,9 +45,6 @@ def rq1(mongod_collection):
 
     return mongod_collection.count(query)
 
-result_rq1 = rq1(my_collection)
-# print(result_rq1)
-
 def rq2(mongod_collection):
     """
     Retrieves the employees with the tag of active.
@@ -76,12 +53,11 @@ def rq2(mongod_collection):
     query = {'tags': {'$in': ['active']}}
     return mongod_collection.find(query)
 
-#for doc in rq2(my_collection):
-#   print(doc)
-
 def _parse_goal(goal, amount):
-    # https://stackoverflow.com/questions/4289331/python-extract-numbers-from-a-string
     nums = re.findall(r'\d+', goal)
+
+    # NOTE: just find one number.  Doesn't check for decimal numbers, or
+    # advanced inputs like 50 min 30 sec.
     if len(nums) == 1:
         if int(nums[0]) > amount:
             return True
@@ -98,11 +74,6 @@ def rq3(mongod_collection):
 
     return filtered_results
 
-# for doc in rq3(my_collection):
-    # print(doc)
-
-import pprint
-
 def rq4(mongod_collection):
     """
     Aggregate total activity duration for all users.
@@ -110,10 +81,64 @@ def rq4(mongod_collection):
 
     pipeline = [
         {'$unwind': '$activityDuration'},
-        {'$group': {'_id': None, 'duration': {'$sum': '$activityDuration'}}}
+        {'$group': {'_id': '$uid', 'duration': {'$sum': '$activityDuration'}}},
+        {'$sort': {'_id': 1} },
     ]
 
     return mongod_collection.aggregate(pipeline)
 
-pprint.pprint(list(rq4(my_collection)))
+if __name__ == "__main__":
+    print('CSCE 489-599 Cloud Computing: Project 1 Task 1.  Done by Charlie.')
+    print('Does the queries outlined in part B.')
+    print("Connecting to MongoDB at: {}".format(HOST))
+    client = MongoClient(HOST)
+
+    print("Connected.  Using db [{}] and collection [{}]".format(DB, COLLECTION))
+    my_db = client[DB]
+    my_collection = my_db[COLLECTION]
+
+    print('----')
+    print("Executing WQ1: Upserting data.")
+    wq1_results = wq1(my_collection)
+    print("Done.  Upsert bulk results:")
+    pprint.pprint(wq1_results.bulk_api_result)
+
+    print('----')
+    print("Executing WQ2: Updating data.")
+    wq2_results = wq2(my_collection)
+    print("Done.  Update results:")
+    print("Request update matched : {} documents (should be 1).".format(wq2_results.matched_count))
+
+    print('----')
+    print("Executing RQ1: Getting total employee count.")
+    rq1_results = rq1(my_collection)
+    print("Done.  Number of employees is {}.".format(rq1_results))
+
+    print('----')
+    print("Executing RQ2: Getting employees with the 'active' tag.")
+    rq2_results = rq2(my_collection)
+    print("Done.  Number of employees with the active tag is is {}.".format(rq2_results.count()))
+    print("The detailed data is:")
+    for employee in rq2_results:
+        print('----')
+        pprint.pprint(employee)
+
+    print('----')
+    print("Executing RQ3: Getting employees with a goal activity of over 60 min.")
+    rq3_results = rq3(my_collection)
+    print("Done.  Number of employees with is {}.".format(len(rq3_results)))
+    print("The detailed data is:")
+    for employee in rq3_results:
+        print('----')
+        pprint.pprint(employee)
+
+    print('----')
+    print("Executing RQ4: Aggregating the total activity duration of each employee.")
+    rq4_results = rq4(my_collection)
+    # print("Done.  Number of employees with is {}.".format(len(rq4_results)))
+    print("The data is:")
+    print("data types: _id is uid, duration is total activity")
+    for employee in rq4_results:
+        print('----')
+        pprint.pprint(employee)
 
