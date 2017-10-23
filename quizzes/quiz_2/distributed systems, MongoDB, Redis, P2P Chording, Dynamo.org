@@ -1,0 +1,122 @@
+#+TITLE: Quiz 2: P2P DHT (Chording), NoSQL Databases (Mongo, Redis) and Failure Detection
+#+SUBTITLE: For ECEN 489-599 Cloud Computing, Autumn 2017
+#+AUTHOR: Yinwei (Charlie) Zhang
+
+* Question 1: Distributed system assumptions
+  Which of the following assumptions should not be made about a distributed system? Mark all that apply.
+  - [x] The network latency is always low and predictable	
+  - The set of computer working together (called group of nodes) can change over time
+  - [x] New nodes cannot join a distributed system
+  - The nodes of a distributed system may fail at any time
+
+* Question 2: Why use NoSQL over relationship
+  Which of the following are reasons to use NoSQL over relational databases? Mark all that apply.
+
+  - [x] Most of the data in present day applications is unstructured and cannot be fit in schemas
+  - There is a need to maintain all the data in a single server
+  - [x] The volume of data is huge
+  - [x] Database queries need to be returned quickly
+
+* Question 3: MongoDB
+  Which of the following statements about MongoDB are false? Mark all that apply.
+
+  - [x] All MongoDB documents should have the same set of fields
+  - [x] MongoDB is a wide column database
+  - MongoDB supports JSON documents
+  - [x] Adding a field to a document will add that field to all documents
+
+* Question 4: In memory databases? 
+  Which of the following about in-memory databases are true?
+
+  - If the machine running the in-memory database restarts, all the data is lost
+  - [x] Fetching data from memory (RAM) is orders of magnitude faster than fetching data from the disk
+  - In-memory databases need to have a predetermined schema
+  - In-memory databases can never store data on the disk
+
+* Question 5: Failure Detection Completeness
+  Failure detectors have a property called completeness. When a process fails, if at least one other processor identifies that the process has failed, the failure detector is said to be complete. 100% complete failure detectors are complete under all conditions. Which of the following failure detectors is not 100% complete?
+
+  The options are all-to-all heartbeating, centralized heartbeating, gossip protocol, ping-based protocol.  Centralized heartbeating dies if the central node dies, so it's not complete.
+* Question 6: Relation Databases Obsolete?
+  Are relational databases obsolete? Is there a reason to prefer them over NoSQL databases? Answer in 3-5 sentences.
+
+  No, relational databases aren't obsolete.  Reasons:
+  - Pure CA databases (like an RDBMS) are useful.
+    - We can build CP or AP data stores (or a mix of both, depending on partition mode) by using a CA database (RDBMS) as a base, like how Amazon Dynamo used MySQL on its individual nodes.
+    - Some applications don't need partition tolerance, like internal metrics, or a startup testing an idea.
+  - Relational Databases are well developed and supported (over decades of work)
+    - SQL is a super expressive, mathematically backed (relational algebra) query language.
+      - Leads to BI/BA (business analysis) apps built on top of it (look at SAP).
+    - RDBMS are well designed (ACID) to be safe (atomic, consistent, isolation, durable).
+
+* Question 7: Consistency Levels
+  Cassandra provides different consistency levels that can be ensured at query time. ANY is a level of consistency for write queries, where the query to a key succeeds if it is written to any one of the nodes, including ones that may not be managing the key. QUORUM is a level of consistency where the write succeeds only after a majority of the nodes (i.e., more than half) managing the key have been written to. Answer the following questions in 3-5 sentences each.
+** What can you say about the availability of these two consistency levels?
+   - ANY has more availability than QUORUM.  (Since ANY is a write consistency level while QUORUM is both, let's just think about writes).
+     - ANY will be 'available' or return an ack as long as the write is registered by /any/ node in the system.  That means as long as 1 node is up, the write will be available.
+     - QUORUM needs at least 1 more than half of the primary and replica nodes for the key to be up in order for the write to be available or return an ack.
+** If there are n nodes in Cassandra managing a key, how many failures can the two consistency levels handle?
+   - The most risky state is when a primary (writer) node just sends the ack (so the write went through) but before the primary sends the writes to its replicas.  That way, if the node fails, the write is lost.  Assuming the worst case, that means:
+     - ANY can't tolerate any failures.  Since the write can ack'd by any node, the write can be lost or postponed before the writed propagates to either the primary node or its replicas.
+     - QUORUM can tolerate up to (QUORUM - 1) node failures, or half of the primary and replica nodes responsible for the key.
+* Question 8: Chords
+  A P2P system using Chord with a ring size of 64 has nodes at positions 1, 5, 7, 17, 32, 34, 40, 50, and 62. Answer the following questions and show how you arrived at the result (will be especially useful for partial credit):
+** How many entries does each finger table have?
+   Finger tables ensure (if no entries are failures) that we have O(logn) lookup time.  That means log(n) entries.  In  this case, we have a size of 64, so our finger table size is log_2(64) = 6.
+** A key k is hashed to 49. Which node is this key-value pair stored in?
+   For each key, the node that stores it is called the successor node.  That's the nearest node that follows the key (so clockwise if we think from the key to the node on a ring).  For a key hashed to 49, the nearest increasing node is at 50.  So node 50.
+** Write down the finger table of node 5.
+   To create the finger table:
+   - Start at index 0 and end at index m-1 (5 in this case), where m is the number of bits that correspond to the size of the ring.
+   - Find the successor node for n + 2^i, where n is the node number and i is the index.  The range that the successor node covers is between [n + 2^i, n + 2^{i+1}].
+
+   | index | range   | successor |
+   |-------+---------+-----------|
+   |     0 | [6,7)   |         7 |
+   |     1 | [7,9)   |         7 |
+   |     2 | [9,13)  |        17 |
+   |     3 | [13,21) |        17 |
+   |     4 | [21,37) |        32 |
+   |     5 | [37, 5) |        40 |
+** Write down the finger table of node 40.
+   | index | range    | successor |
+   |-------+----------+-----------|
+   |     0 | [41, 42) |        50 |
+   |     1 | [42, 44) |        50 |
+   |     2 | [44, 48) |        50 |
+   |     3 | [48, 56) |        50 |
+   |     4 | [56, 8)  |        62 |
+   |     5 | [8, 40)  |        17 |
+** If a request for a file with key k hashed to value 49 comes to node 5, how will the request be redirected to the appropriate node? Write down the finger table entry each intermediate node looks at, and the node it forwards the request to.
+   To find out, we look at the ranges in the finger table and match them to the successor node.  To find the final successor node (where the key is), we see if the successor node is in the range and larger than or equal to the key.
+
+   Let's start at node 5.  In node 5's finger table, 49 falls between [38,6), so the successor node is 40.  40 is less than 49, so we ping node 40.  In node 40, the range [48,56) points to successor node 50.  Since key 49 is less than node 50, node 50 contains the info for key 49.
+
+   So we make 2 requests total, one to node 40 which will route us to node 50, which contains the key.
+** What failure detection mechanism do you suggest for this system, and why?
+   Since the Chord distributed hash table method uses finger tables, each node only has access to a subset of the entire set of nodes (usually log_2(n), where n is the size of the ring).  That means options like all to all and centralized heartbeat are out the window immediately.
+
+   The options left are ping based, gossip, and ring based heartbeat.  Ring based heartbeat sounds like a pain to organize with finger tables, so I'll rule that out.  Ping based also is pain, especially when we implement the second ACK check (where we ask other nodes to ping the offending node). That's because our other finger table entries probabilistically can't ping the offending node if the node size is large (logn).
+
+   That leaves gossip protocol as the easiest and therefore best option for the Chord system. The membership list mirrors the node's finger tables.  Indeed that's how Dynamo, which uses a chordlike DHT, handles failure detection.
+* Question 9: Twitter based database design 
+For her research, Alice is building an application that pulls data from twitter. She wants to study mentions of other users in tweets. Given a user, she wants to study who the user has mentioned and how many times. E.g., she wants to know who Bob mentioned in his tweets. She also wants to maintain how many times each user was mentioned in Bob’s tweets. 
+** She is not sure what kind of a database to use for this application. What database would you suggest to her, and why?
+   I recommend Redis.
+   - The applications does two things:  Pull data from Twitter and then aggregates the data to get the number of mentions for each mentioned tweeter.
+     - So we need to process the tweets to get the requested data.
+     - To process the tweets, do we need to get the tweets in real time?  Or do batching?
+     - How do we do the aggregation?
+   - Redis can handle this easily by:
+     - Redis queues lets the server push tweets into the queue and lets another server (or the same one) read from the queue.
+     - Redis has easy atomic INCR (increment) and INCRBY (increment by) to process one tweet or a batch of them.
+   - More generally:
+     - Redis is really fast.  Our data has a lot of writes, not that much data (if we keep the tweet queue small, like 1 hour or less), and not that much reads.
+     - Redis writes and reads are super fast, (but limited space, but that's fine), making it a great choice.
+     - Easy to implement with built in queues and incrementors.  Also easy to scale with sharding and master slave replication.
+   
+** Will Alice benefit from using an in-memory cache? Why?
+   No, Alice won't benefit from a in memory cache (although Redis is an in memory database and can be designed or considered an in memory cache).
+   - I'm assuming only Alice (and a few other researchers) are using the app, so low reads.  Caches are useful where there a ton of reads, slowing the main database.
+   - Caches are good when the data expires relatively quickly.  In our case the data does expire quickly as the servers update the database, but that doesn't justify building a cache when we have low reads.
+   - Reads aren't the bottleneck in terms of app latency.  If we want a real time app, internet connections take a long longer to resolve that reads, making that the bottleneck.

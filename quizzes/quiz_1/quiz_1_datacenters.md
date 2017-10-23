@@ -50,6 +50,7 @@ Instead of suspecting, he should have enough infrastructure tools to check the l
 Buy in bulk:  Since datacenters have a lot of commodity hardware, we can buy them (cores, switches, DRAM, cords, racks) at a cheaper price.
 Automation:  Traditional computers are run physically by humans (from buying them, moving them, turning them on, installing an OS, running programs).  Datacenters have software (OpenStack, Docker, etc) that manages the hardware, freeing up human time.
 Homogenization: Datacenters can be built from simple, similar components so there is less overhead in management and automation.  Traditional computers come in many, many different configs.  Kind of like the Android vs iOS.  Android has to support so many hardware configs so it runs much slower than iOS (which is why Apple can get away with worse hardware specs).
+Non-Idle Load: can sell computing power when load is low.
 
 ### Question 7: 3 Tier Architecture
 *What is the 3-tier architecture? Explain the functionality of each layer.*

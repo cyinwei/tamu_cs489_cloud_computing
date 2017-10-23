@@ -1,0 +1,21 @@
+#+TITLE: Datacenter as Computer: Ch. 3.3 and 6.  WSC Networking and Costs
+
+* Ch. 3.3 WSC Networking 
+  TLDR: Servers can scale linearly with memory and CPU.  But they scale exponentially with networking.
+
+** Networking doesn't scale
+   Traditional networks work like trees, where the leaves are the nodes.  Doubling the leaf networks also doubles the bisection bandwidth (network across the middle of the tree or the path that divides the tree in 2).
+
+   To get right througput at the root (outgoing network) we need a fat tree, which scales exponentially (large middle tree section).
+
+** Approaches
+   We can oversubscribe at the rack level.  We can use a 48 input switch, use 40 for inputs, and 8 for uplink, creating a 5:1 oversubscription.  So if every node is using the rack switch, the max throughput is 2Gbps in a 10Gbps switch.
+
+   We can also offset special traffic (video, storage) to for example the storage units.  AKA Storage Area Network (SAN).
+* Ch. 6 Costs
+  - Too small or too large of a datacenter costs more
+    - Small: Can't amortize fixed costs
+    - Big: Needs expensive stuff like electrical stations
+  - The big tradeoff is server costs and energy consumption.  The trend is that server costs are stagnant, decreasing, while efficiency increases.
+  - Cloud providers can provide competitive pricing because of scale
+  

@@ -1,0 +1,36 @@
+#+TITLE: Workloads
+
+* What are workloads?
+  They the architecture of applications deployed in the cloud.
+* Most workloads are:
+  Tiered.  The most common is the 3 tier architecture, where:
+  - Bottom tier are the databases or data.
+  - Middle tier handles business logic.
+  - Top tier handles the client interface.
+
+  Think MVC abstacted into the cloud.  Other related concepts include Service Orientated Architecture, microservices, etc.
+* Parts of workloads
+  - To manage connections (for any service), use a load balancer.
+  - The application itself typically runs cloned in multiple servers/virtual OSes/containers.
+  - The app can call other servers which provide microservices (like authentication or presence in Facebook messenger)
+  - The application handles state through databases.  So the client app writes / reads from certain databases.
+    - Blobs are put in AWS S3
+    - Servers use Dynamo to hold state
+    - PostGres / RDB for analytics
+* Examples of workloads
+  - Chat Service @ Facebook
+    - Clients talk to other services [presence, channel clusters, web tier]
+    - Data is dumped to a logger
+    - Heavy work is done by active services, not dbs
+  - Slack
+    - AWS Route 53 -> Load balancing (elastic load balancing)
+    - Web servers talk to other backend services who store data on replicated MySQL dbs.
+    - Longer data is stored in S3.
+    - Some backend services use Redis
+  - Dropbcam
+    - Input hit servers, which sent data to Dynamo, Postgres
+      - Data eventually hit services that did computer vision.
+* Workloads are evolving
+  - People used to think that the cloud just did web servers and MapReduce but now...
+  - Complex stuff like AR, VR, voice, video games use the cloud as the backend
+  - That do complex things use ride sharing, video games, etc.

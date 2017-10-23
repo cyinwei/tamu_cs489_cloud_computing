@@ -23,4 +23,4 @@
 ** When is availability important?
    Actually, availability is the most important property in most distributed system design.  Since code = data + algorithms, most programs or web services or apps will break without data.  How useful is Twitter without the internet?  Versus Twitter with just data a day late?  That's why most apps cache their data :).
 * What is Partition Tolerance?
-  Does the system have more than one node (computer)?  That means 
+  Does the system have more than one node (computer)?   

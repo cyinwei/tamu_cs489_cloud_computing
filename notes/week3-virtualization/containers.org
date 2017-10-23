@@ -1,0 +1,21 @@
+#+TITLE: Containers
+* Containers
+** What are they?
+   - Think of them as an advanced chroot.  They expose an apparent root for a process (and its children), so the process can't access the file system of the real root or other processes.
+   - So the container packages the app and its dependencies from an app point of view (the things you install with apt-get, pacman or brew).
+   - So containers don't install a VM on stop of the host OS.  It just runs on top of the OS.  It seems that most containers support Linux (Docker) for production.
+     - Actually, Docker right now uses a Linux VM to run Linux containers for development.  It'll release a Windows Docker for its server (that can only run Windows containers).
+   - TLDR: Process isolation.  Less resources than full VMs, but less security.
+** Docker
+   - Docker runs on whatever the underlying OS is.  It doesn't install a VM for all docker apps to run on, for instance (unless Windows).
+   - Docker works like git.  Docker updates are relatively small since they are commits.  And so are downloads.  Forks are copy on write, making them fast too.  The commits behave like (Add [A], Modify [M], Delete [D]) shell commands (kind of).
+** Why use containers?
+   Quote from a comment from here: https://techcrunch.com/2016/10/16/wtf-is-a-container/
+
+   I think it's pointless to talk about containers without also discussing orchestration via Kubernetes, Swarm or Mesos. The main benefit of containers and container orchestrators is that together they allow you to treat an arbitrary number of machines as if they were a single pool of computational resources.
+
+   If you configure your application properly, you can run it inside a Kubernetes cluster in such a way that it can automatically scale itself up and down on demand (based on usage).
+   
+   As a developer, this means that you no longer have to know exactly what hardware your software is running on - Is it running on a single machine or on 1000 machines?
+   
+   Now it's actually possible to write code and configure your applications in such a way that it can operate at any scale.

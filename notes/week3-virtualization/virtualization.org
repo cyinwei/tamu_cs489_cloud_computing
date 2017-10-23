@@ -1,0 +1,58 @@
+#+TITLE: Virtualization
+
+* Why virtualization at the datacenter level?
+  TLDR: Virtualization increases individual server CPU utilization rate (which was traditionally low without virtualization). 
+** Virtualization increases data center efficiency by a large amount.
+   - Virtualizes makes a single server more efficient.
+     - Compare that to the holistic data center efficiency strategies like economy of scale, cheap energy, and datacenter automation.
+** The history of datacenters and virtualization
+   From the IDC Source, server costs stayed the same or dropped a bit from '96 to '13 (about $50bn USD).  Physical servers sort of flatlined after '08.  Logical servers exponentially rose, indicating the rise of virtualization.  The increases in costs were mostly from admin tools.
+
+   Note that we have many, many servers in a datacenter.
+
+*** History
+    Back in the summer of 2000, Walmart's servers had a 7% CPU utilization rate. Even at peaks (holidays, analytics) it went to around 50%.  So distributed servers (datacenters) historically had /terrible/ CPU usage.
+
+    But at the same time, mainframes (which have around a lot longer), had really high CPU usage (around 90%).  Why?  Many jobs put on the mainframes were similar to the jobs put on the server racks.  The answer was virtualization.  Different software have different library / OS stacks, so mainframes used virtualization to get around that.
+
+    After '08, we began to apply that technology to commodity hardware (cheap off the shelf, server pizza boxes / closets / datacenters).
+* What is virtualization?
+** Hypervisor
+   We can't run virtual OSes like Google Chrome.
+
+   You run virtual OSes on top of a hypervisor.  That's because privileged instructions (accessing memory, drivers, networking) from virtual OSes might conflict with each other (or from a malicious perspective: hack into the other virtual OSes / root).  We need a gatekeeper to multiplex and provide security for the virtual OSes.
+
+   So a hypervisor provides an apparent hardware interface for the virtual OSes.  Another term, Virtual Machine Monitor (VMM) means the same.  [Type I are hypervisors, type II run on top of one like the Java VM.]
+
+   Hypervisors provide:
+   - Security
+   - Fidelilty (The hypervisor is available always (no bugs, crashes)
+   - Performance
+   - Isolation
+
+** Hypervisor techniques
+*** Trap and execute
+    One method is to trap any privileged instruction from an virtual OS and let the hypervisor execute / check it.
+
+*** Binary translation
+    Another process is like polling: the hypervisor parses each virtual OS instruction and does binary translation.  If an instruction is 'bad', then the hypervisor replaces it with a set of nonoffending instructions.  VMWare pioneered this it.  The techniques scales well.
+
+    For most user level code, we don't need binary translation.  Applications run at native speed.
+
+*** Paravirtualization
+    Breaks a pure abstract hardware interface that a hypervisor provides.  Instead, we alter the guest OS (Linux => Xen, then KVM) so that it hands over code / functions with a lot of slow instructions (so it could run on the host, for example) to the hypervisor to deal with.
+
+    Obviously, the hypervisor needs to be aware of the paravirtualization hooks.
+   
+** What ISU Architectures allow for virtualization?
+   Up until 2005, x86 wasn't virtualizable (9 privileged instructions actually didn't run in privleged mode).  ARM mostly works, MIPS mostly works.
+
+   Intel x86 VT-x started in 2005.
+
+*** x64 virtualization history
+    Started with CPU, then memory, then I/O
+** Virtualization vs Cloud Computing
+   From: rackspace, https://www.youtube.com/watch?v=14KJoDs6reg
+
+   Think virtualization as human + virtual machines, the cloud as API + virtual machines (simplified, more accurate for IaaS).  Less accurate for PaaS, DBaaS, etc.
+ 

@@ -1,0 +1,421 @@
+#+TITLE: Project 2: Assessing hosting options
+#+SUBTITLE: Texas A&M Cloud Computing (CSCE 489), Autumn 2017
+#+AUTHOR: Yinwei (Charlie) Zhang
+* Report 1: Cloud or local based hosting?
+** Log
+
+   I took the full 8 hours for this project.
+
+   - Report
+     - [25 min] Outline
+     - General Assumptions
+       - [25 min] Team
+       - [125 min] Product
+     - [50 min] Cloud based hosting
+     - [50 min] Local hosting
+     - [25 min] Comparisons
+   - Research
+     - [25 min] Product design
+     - [100 min] Cloud hosting
+     - [50 min] Local hosting
+
+** General Assumptions
+
+*** Team
+
+    The startup in College Station, whom I'll refer to as "startup", is a small, lightweight team.  They are made up of either students or faculty who specialize in image processing and machine learning.  They have competent experience in mobile app design and in writing backend services.
+
+    As a small team, the startup has little to no experience with operating a large backend, either physically with servers or in the cloud with an IaaS (Infrastructure as a Service).  The most experience they have is running the backend locally on their computers, or running a few nodes in the cloud.  Hence why they are asking us for advice.
+
+    As a team of students and professors, their funding is from external investors.  They have somewhere between $100,000 and $2,500,000 in funding (past seed round, around Series A).
+
+    *TLDR:*
+    - Small team
+    - Little experience with hosting and scaling, either with server racks or the cloud
+    - Experts in machine learning, image processing
+    - Good at mobile app design and backend services.
+    - $100k to $2.5 million in funding (runway money)
+*** Product
+
+**** Target Customer
+
+     Since the startup wants to target Texas A&M and nearby colleges in the next three years, I assume we targeting college students, or millenials.
+
+     The closest app I can think of today is Snapchat.  It targets millenials with image and video filters.  Therefore, I'll be making assumptions on the startup's product with that perspective in mind.
+
+**** Licensing
+
+     Since the startup is using Ubuntu and Python, I'm assuming that their entire software stack runs on open source and privately developed work.  They have no licensing costs.
+
+**** Image Processing
+
+     From the customer's perspective, I assume they need the thematic video in under a minute.  I assume the bulk of the response time comes from the computation.  
+
+     I assume both configurations (4 nodes with GPU or 16 nodes) can do the processing in less than a minute.
+
+     I assume that the 16 core configuration can have a response rate of 10 seconds a video.  The 4 nodes then will have a response rate of either 5 seconds of 8 seconds based on the different scenarios.
+
+     That means the 16 core system can handle 6 videos per minute, and depending on the cases, the 4 nodes plus GPU can handle 12 or 7.5 videos per minute.
+
+**** Data
+
+     I assume that the average user uploads 90MB a day and generates 10MB of thematic videos.  See the appendix for calculations.
+
+     If the product succeeds, I estimate we'll have, we'll have 90% adoption in the Texas A&M and UT campus, we will have 105k daily active users.  I assume the growth is exponential and is modeled by an $x^2$ curve.  Then the expected or average userbase all three years is $\frac{1}{3}$ of 105k, or about 35.2k users.
+
+     I assume we delete the user data 1 day after the upload (thus forcing an reupload the next day).  I assume we keep the output thematic video forever.  I assume the average video is viewed 10 times in its lifetime.  (extremely fuzzy guess without much data).
+
+     Based on that, we need to store for the thematic videos:
+
+     $Average Users \times Days \times Storage$
+
+     $35212 \times 1095 \times 10MB = 385.6TB$
+
+     The storage for input videos at maximum capacity would be:
+
+     $Peak Users \times 1 Day \times Storage$
+
+     $105638 \times 1 \times 90MB \approx 9.5TB $
+
+     So we would need to store about *395TB* on our system at the end of three years.
+     
+**** Number of nodes needed
+
+     For the image processing setup, the average user generates 10MB of output and 90MB of input.  Most of the computing nodes needed will be for the neural net video processing.  The nodes needed for web API requests will much less than the nodes required for image processing.  I'm guessing around a 100:1 ratio, since one Python [[https://github.com/falconry/falcon][Falcon]] HTTP/REST node can handle tens of thousands of requests per second.  So I'll ignore that in the calculations.
+
+     *TLDR:* Image processing nodes >> rest api nodes, ignore rest api nodes
+
+**** Bandwidth
+
+     Assuming people watch their data 10 times then they upload, then the overall upload download ratio is similar (90MB up, 100MB down).  Using the average user base of 35.2k users, then we have a network usage of 3.169 TB up and 3.512TB down per day.
+
+*** General architecture
+
+    Our frontend is the mobile app, which sends images, videos, and music history as text.
+
+    Our backend recieves the images, video and music history, and sends back thematics videos.
+
+**** Backend specifics
+
+     Our backend needs to store and access many large binary objects, e.g. images and videos.
+
+     It also needs to send back videos, which are also large binary objects.  Since certain videos will be 'popular', we'll need a caching system to cache the most popular videos.
+
+     So the system will be stream based, where the data inputs gets transformed into thematic videos within a short time, say under one minute.  Then, the output videos gets stored.  We'll cache the output videos based on the popularity (something like a least recently accessed approach with more of a history).
+
+     The input data will get put in a time bound buffer so users can remake videos quickly.
+
+** Cloud based hosting
+
+*** Assumptions
+
+    I assume the team doesn't have much experience in using a cloud service.  For this consultation, I'm using AWS because they are the market leader [1].
+
+    For the product, I assume they have their backend applications are written in Python3 run in Ubuntu 16.04.  They have separate applications for handling API requests and for doing the thematic video processing.
+
+*** Design considerations
+
+    We can use demand based virtual servers or rent them from Amazon.  Since we don't have the usage yet, we should start with demand based options.  We'll choose Ohio as the region, since that is closest to Texas.
+
+*** Architecture
+
+    Since we're using the cloud, there are no initial hardware costs.
+
+    Amazon's virtual servers are named EC2 (Elastic Compute Cloud)[1].  AWS (Amazon Web Services) lets us handle scaling and load balancing with Elastic Load Balancer.  For media storage, we can use AWS S3.  For text storage, we can use AWS RDB.
+
+    Amazon combines these into a service called Elastic Beanstalk, which handles the provisioning and load balancing of these resources based on usage.  The product in its current state will fit perfectly with Elastic Beanstalk.
+
+    To enable caching and low user side response times, we'll use Amazon's CloudFront.  Although CDN's aren't really required if we're focusing on a specific geographical area (Texas), the caching feature for popular videos will be important.
+
+*** EC2 Types for image processing
+
+**** 4 Node (with GPU, SSD)
+
+     If the AWS cores are fast enough, then we can find a EC2 size with an GPU.  AWS recently released elastic GPUs that can be attached to EC2 instances.
+
+     We can pick a preconfigured EC2 with a GPU.  For machine learning, Amazon recommends the =p2= instances [3].  I assume that the [[https://aws.amazon.com/ec2/pricing/on-demand/][=p2.xlarge=]] option works.
+
+     A cluster of 4 =p2.xlarge= instances will cost 4 times $7.2 per hour, or $28.2 per hour.  Note that AWS supports clustering with the =p2= configuration.
+
+**** 16 Node
+
+     The general purpose EC2 instance is the [[https://aws.amazon.com/ec2/instance-types/][=m4=]] series.  If we use the =m4.xlarge= instance, then 16 instances will cost 16 times $0.2 per hour, or $0.32 per hour.  This makes the 16 node option the far better choice, no matter what speed scenario (that the GPUs are twice as fast or 20% faster) we choose.
+
+     Note that AWS supports clustering with the =m4= configuration.
+
+*** Financial Cost
+    We have no capital costs and have $180k per year expense costs.  If we hire outside help, that jumps to $322k per year.
+
+**** Capital
+
+     $0.  With a cloud based system, we have no capital costs.
+
+**** Expense
+
+     Hosting on AWS costs in total $14,989.29 per month, or *$179,871.48* per year.  We use the calculator with inputs linked at [8].  With labor costs, the total expenses per year on average are about $322k.
+
+***** Labor costs
+
+      We need to devote some resources into setting up the architectures and maintaing it.  A cloud architect would cost $142k per year [6].  However, I assume some member of the team will learn AWS and use it, for *$0*.
+
+***** Storage costs
+
+      Using S3, we'll need to keep about 395TB of data.  With the $x^2$ growth, we can average (do the integral) that to be one third of that, or 131.7TB.  The S3 storage costs are listed here [5].
+    
+      S3 also costs for post and get requests.  Since it is request based and not data based prices, we can approximate that based on our bandwidths.  Each user averages about 6 uploads or post requests, and watches about 4 videos, or get requests per day (see appendix).
+     
+      From the calculator, S3 costs *$3411.09k* per month.
+
+***** Cache costs
+
+      We'll need to use CloudFront for faster streaming and to cache popular videos.  From the calculator, we pay *7531.10* per month, based on 105 TB's worth of CDN and caching.
+
+***** Node costs
+
+     The 16 core configuration is much cheaper on AWS.  At $0.32 per hour, it can handle 6 requests.  Each user generates 41.6% of a video a day.  On average over the three years, that is 41.6% of 35.2k users.  Which means we need to handle 1463 requests per day.  That is about 1.01 requests per minute.  Which means we need about one clusters.  Based on the calculator, we pay *$23424.00* per month.
+     
+** TAMU or physical based hosting
+
+   I'm starting to run out of time, so I'll use the information from Chapter 6 of Datacenter as Computer for rough pricing guidelines [7].
+
+*** Assumptions
+
+    I assume the team doesn't have much in setting up physical racks and is willing to hire some group to build and maintain the servers for them with cash (and not equity).  With physical hardware, we need to handle the spikes in traffic.
+
+    (NOTE: I'm thinking something like using a Poisson process to better model the load, but ran out of time)
+
+**** 4 Nodes + GPU or 16 Nodes
+
+     GPUs are efficient than CPUs on a per instruction basis [9].  4 nodes is also one fourth the amount of 16 nodes, which means less power for the CPU, but also the peripheral elements like disk.  So we're using the GPU option.
+
+     From the calculations in the Cloud Node sections, we need to handle 1463 requests per day, or 1 request per second.  With the twice as fast options we only need half a cluster.  To handle increased demand, I assume a peak of 5 times the average processing.  So we need 2.5 or three clusters for the faster option, four clusters with the slower option.
+
+*** Architecture
+
+    From the hardware perspective, we will use physical servers that run Ubuntu, storage nodes for the videos and images, along with ethernet switches for networking.  We'll need extra hardware and space to accomodate user spikes in uploading or watching videos (like from a major event).  We also need extra hardware to cache popular videos.
+
+    We'll have cluster for thematic videos, where data is read much more then they are written (10:1 ratio by my assumptions).  We'll have a cluster for input videos to process (1:1 ratio), which acts like a timed based buffer, since we get rid of input videos after a day.
+
+    The cluster for high reads can use an memory database, like Redis, to cache the most recently used videos.  The cluster for high writes will ping the data process cluster to process, and will queue the write for later, or when the RAM runs out.  The information clusters can be run on a chord system similar to dynamo to spread out load.  To be safe, I'm allocating 10TB hard per server, with 16GB for Redis.  We'll also need backup nodes for reliability (let's say 3 nodes overall per data for a quorum).  That means we'll need 120 servers, or 3 racks, for the data storage.
+
+    From the assumptions, we'll need 12 or 16 high end GPU nodes for data processing.
+
+    From the software perspective, we'll to combine free open source solutions together.  We might use PostgreSQL as our relation database for collecting music.  We might use containers like Docker or Kubernetes to run our web and machine learning nodes.  This approach requires experienced engineers, since we can't just plug and play from a cloud service.
+
+    Since TAMU agreed to pay for all networking and backup costs, we don't worry about that.  TAMU also agreed to pay 95% of the computer racks.
+
+*** Financial Cost
+
+    We'll have a capital cost of *$63k* and will need *$54k* per year.  We'll need $274k per year if we hire outside help to build the system.
+    
+**** Capital
+
+     We'll need to handle 2 normal server racks and half of a GPU server rack.  Using datacenters.com [10] with data from 2015, the average server costs 200-450 Watts.  Assuming the average, we'll have about 325 Watts.  We have 120 normal servers and 12 to 16 GPU, which we'll rate at 650 Watts.  That means in total we'll have 48.4kW per hour.
+
+     The costs from Datacenter as Computer [7] state that it costs from $9-13 per Watt for large datacenters, and smaller ones cost more.  Then I assume our datacenter would cost $26 pwer Watt to construct, which A&M will pay 95% of, which comes out to *$62,920*.  The overall raw cost would be $1,258,400.
+     
+**** Expense
+
+     About *$54k* per year.
+
+***** Humans
+
+      We need to lease the land to hold the data center.  Since we're only storing 3 racks, we can rent a closet for that.  I assume A&M will take care of that at a student / department discount of $0.  The students will also handle security.
+
+      We need a cloud expert and a network engineer, which come to a salary of 142k and 78k [6], [12] to help implement this system.  However, I assume since we are a lean startup, members of the team will learn and do that technology, for *$0*.
+
+***** Hardware depreciation
+
+      Assuming that the servers have a MTTF (mean time to failure) of 7 years [11], our depreciation rate is 14% per year.  Then our expense from depreciation is *$8808.8* per year, since TAMU will cover the 95% of thehardware costs.
+
+***** Energy
+
+      Assuming the average Texas kWh costs of $0.11, we use 48.4kWh [13].  That comes out to *$46445.52* per year.
+
+***** Network
+
+      TAMU Covers that, $0.
+     
+** Comparison between cloud and local hosting
+
+*** Price
+
+    It costs much more to use a Cloud based service than it is to use a TAMU based service from a financial standpoint.  We would need $540k for 3 years with AWS, or $225k for the 3 years with the TAMU solution.  Which makes sense, because A&M is paying 95% for the hardware and paying completely for networking and backups.  If we had to pay for the datacenter from scratch, the cloud would be cheaper.
+
+    Hidden in these costs though is the implementation difficulty.  By using a cloud solution, much of the work handled by AWS, especially with hardware costs.  Although the ecosystem today has open source software components, dealing with hardware failure is no trivial task.  In fact, factoring in labor costs, if we were to hire a datacenter employee (networking, admin, setting up the cluster), the costs we be a bit closer ($540k vs $300k).
+
+    However, the type of application doesn't fit standard cloud functions right now, at least on AWS.  Image and video processing with neural networks function better with GPUs than with CPUs.  GPU clouds are just beginning to come to market, and the price for them on AWS is expensive, which made us go with the other 16 node option.
+
+    For the next three years, the TAMU option would be much cheaper than AWS.
+   
+*** Performance
+
+    Since we're managing one datacenter with a group of students (or one or two hired experts), it will be difficult to expect high availability.  My estimate for peak traffic is a little low, so the system isn't designed to deal with spiked of extremely high traffic.  There will be lag and slowdown on servers, even if the network is perfect.  We'll need better analysis and more servers to handle those spikes.
+
+    By that measure, the TAMU system is less efficient from a CPU perspective, since we have to account for peak times.  With AWS, we pay for what we use, even if it's more expensive.
+
+    If our customers are outside of Texas, then our service will be worse, since we don't have any CDN.
+
+    In performance, AWS beats TAMU in terms of availability and reliability.  TAMU should beat AWS in terms of speed for most of the userbase if they are in Texas.
+
+*** Scalability
+
+    AWS is easier to scale, since once we have the architecture design and software, AWS will handle the hardware.  With TAMU, we'll need to buy more servers, more land, hire more people, etc.
+
+    In terms of price, unless A&M funds extra hardware afterwards, then AWS should be cheaper for the startup until they get really massive because of amortized costs and buying in bulk.
+
+*** Development Speed
+
+    It's much easier to get started on AWS than with TAMU.  Development speed will also be faster, since we don't have to worry putting out hardware fires.  AWS has less problems to solve than running physical servers.
+
+*** Risk
+
+    Buying a datacenter is a big commitment.  Even if TAMU is financing the servers, if the startup fails, A&M loses a lot of money selling used servers.  By contrast, with AWS, if the startup fails, the startup doesn't spend the money.
+
+*** Final thoughts
+
+    Even if TAMU is cheaper, because of development speed, scalability, and performance the startup should go with AWS.  The difference in price is only about $300k, which is worth the extra development speed the team will have in creating a better product.  They could use the time to do better A/B tests and other analysis and find the right product to get greater growth.
+
+** Appendix
+*** Data file size calculations
+**** Data size and formats
+
+     The resolution is 1080p lossy video, since that is the standard on Youtube today.  I used this site [14] to do file size calculations.
+
+***** Input
+
+      I assume the algorithm can handle lossy, compressed data input in order for great video output.
+
+      The file format for video is MP4.  I assume on average an input video is 60 seconds long.  I assume the frame rate 30 fps.
+
+      The image format is JPG at 1080p.
+
+      That puts the a single image file size at 423KB for JPEG ([[https://toolstud.io/photo/megapixel.php?width=1920&height=1080&compare=video&calculate=compressed][src]]) and single video file size at 71.9MB.
+
+***** Output
+
+      The thematic videos generated by the algorithms are 20 seconds in length by average.  I assume most videos are more SnapChat or Vine like, where people just watch clips that last no more than a minute.
+
+      I also assume that the algorithm generates *one* output video, and not multiple.  I also assume a 1:1 video and a 5:1 picture output.  That is, one output video takes in 10 images and an input video.  
+
+      (I also assume equal weight between images and videos, that is 10 images equals one output video or two input video equals one output video).
+
+      The output format should be lossy and compressed, so MP4.  That puts the *average file size to be 24MB*.
+    
+      Note again the output video is $\frac{1}{3}$ the length of an input video.
+     
+**** Data size per user
+
+     Based on the data size projections and the given user tendencies, I expect an average user to upload:
+
+     $0.1(10i + 10v) + 0.7(5i + 0.3v), v = 71.9MB, i = 0.423MB$
+     
+     So the data used per consumer per day is 88.9 MB.  We can round up to 90 MB to include the music history text.
+
+     Based on the projections, the output data needed to be stored is:
+
+     $0.1(10i + 10v) + 0.7(5i + 0.3v)$
+     $4.5i + 1.21v = 9.73MB = 10 MB$
+     
+     So the output we need to store is about 10 MB, or $10/24 = 42\%$ of a whole video.
+
+     We also see that each user uploads 4.5 + 1.21 files or 5.71 files, and generates .42 a video.  Assuming each video is watched 10 times, then they'll watch 4.2 videos a day.
+
+*** Population calculations
+
+    I got the 2015 Austin population data and the 2016 A&M Population data from Google [4].
+
+    Population of both campuses is: $Population_{Texas A\&M} + Population_{UT} = 66,425 + 50,950 = 117375$
+    
+    90% of that is 105637.5.  The growth rate is $x^2$, so to get the average population, we can do the integral from 0 to 1 of $x^2$, which is $\frac{1}{3}$.  Then the expected or average userbase all three years is $\frac{1}{3}$ of 105k, or about 35.2k users.
+    
+** Sources
+   - [1] Cloud service market share from Skyhighnetworks, who referenced Business Insider for the data.  [[https://www.skyhighnetworks.com/cloud-security-blog/microsoft-azure-closes-iaas-adoption-gap-with-amazon-aws/][Link]]
+   - [2] DZone article explaining AWS EC2, Elastic Beanstalk, and Lambda.  [[https://dzone.com/articles/the-rise-of-lambda][Link]]
+   - [3] AWS Docs: EC2 Accelerated Linux Instances.  [[http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/accelerated-computing-instances.html][Link]]
+   - [4] School populations from Google, sourced from Wikipedia.  [[https://www.google.com/search?q=texas+a%26m+student+population&oq=texas+a&aqs=chrome.0.69i59j69i60l3j0j69i65.3184j0j1&sourceid=chrome&ie=UTF-8][Link]]
+   - [5] AWS S3 Costs.  [[https://aws.amazon.com/s3/pricing/][Link]]
+   - [6] Glassdoor cloud architect average salary.  [[https://www.glassdoor.com/Salaries/dallas-cloud-architect-salary-SRCH_IL.0,6_IM218_KO7,22.htm][Link]]
+   - [7] Datacenter as Computer, 2nd ed.  [[http://www.morganclaypool.com/doi/abs/10.2200/S00516ED2V01Y201306CAC024][Link]]
+   - [8] AWS Calculator, with my assumptions put in.  [[https://calculator.s3.amazonaws.com/index.html#r=IAD&key=calc-484E1095-C6DB-412C-80E2-28020F7032E3][Link]]
+   - [9] NVIDIA Market piece on GPU efficiency.  [[http://www.nvidia.com/object/gcr-energy-efficiency.html][Link]]
+   - [10] Datacenters average server power consumption  [[https://www.datacenters.com/news/infrastructure/135-data-center-power-costs-and-requirements][Link]]
+   - [11] IRS Servers (Ctrl-F servers) depreciation  [[https://www.irs.gov/irm/part1/irm_01-035-006][Link]]
+   - [12] Network engineer for a datacenter  [[https://www.glassdoor.com/Salaries/dallas-data-center-network-engineer-salary-SRCH_IL.0,6_IM218_KO7,35.htm][Link]]
+   - [13] NPR average energy costs [[http://www.npr.org/sections/money/2011/10/27/141766341/the-price-of-electricity-in-your-state][Link]]
+   - [14] Video and image file size calculator  [[https://toolstud.io/photo/megapixel.php?width=1920&height=1080&compare=video&calculate=compressed][Link]]
+* Report 2: Learning Heroku
+** Log
+   I worked 160 minutes, or 2 hours and 40 minutes.  Writing and researching took half the time.
+
+   - [80 min] Getting Started on Heroku with =Python=
+     - [15 min] Introduction (Installing Heroku CLI, accounts, =Postgres=)
+     - [5 min] Set Up
+     - [0 min] Prepare the app
+     - [5 min] Deploy the app
+     - [5 min] Declare app dependencies
+     - [5 min] Run the app locally
+     - [15 min] Push local changes
+     - [10 min] Provision add-ons
+     - [5 min] Start a console
+     - [5 min] Define config vars
+     - [10 min] Provision a database
+     - [5 min] Next steps
+   - [80 min] Report
+     - Problems faced section
+     - How useful was the tutorial section
+     - Initial impressions
+
+** Problems faced and how I solved them
+
+   I didn't face any major problems.  Most issues were related to installing the Heroku CLI, or =Postgres=, or getting the right version of =Python=.  To solve these problems, I just Googled.  
+
+   I'm doing this project on an Mac OSX Sierra (version 10.12.6), so I used [[https://brew.sh/][=homebrew=]] to install =Postgres= (as a service) and Heroku.  I used [[https://conda.io/docs/][=conda=]] to set up my python environment for pipenv.
+
+   Heroku's [[https://devcenter.heroku.com/articles/getting-started-with-python#introduction][getting started guide]] for Python is excellent if you follow the steps to a tee.  If you miss a step or experiment, it's back to rereading or Googling.  For example, I made the mistake of running more than one one-off node, which prevented me from accessing =Postgres= with another one-off node.  I had to close my original one-off node (shell) to run the =Postgres= migrate commands.
+
+** How useful is this exercise in terms of understanding Heroku
+
+   I learned a lot about Heroku's interface, not about how it functions under the hood.  At the end of the tutorial, I am fairly confident I can set up an =Django= web app on Heroku.  I can also do simple operations like adding logging addons or setting up =Postgres= schemas.  I'm not confident at all I can do more complex operations, like scaling the app up or run heavier database operations.
+
+   The guide did a great job of introducing Heroku as a platform from a developer's perspective.  They made Heroku feel like Github, where all you do is push your app and then you just sit back and relax.  There's no discussion on scaling Heroku or how the infrastructure works besides a link at the end.  
+
+   In fact, I understand Heroku as much as I understand Github; just the user interface, barely any of the backend infrastructure.  For example, some questions I had were:
+
+   1. How does Heroku handle load balancing?
+   2. How does Heroku's =Postgres= deal with sharding, replication, and rollbacks?
+   3. How do we know when to automatically add more dynamos?
+
+   *TLDR:* The guide did a poor job of explaining to me /how/ Heroku works.  It did a great job of explaining /how to use/ Heroku.
+
+** Initial impressions
+
+   Man, that was /easy/.  Heroku is clearly designed with developer experience in mind.  Everything that is /not/ related to writing application software is taken care of.
+
+   I don't have to worry about installing a virtual OS, application libraries, or setting an continuous intergration service to pull my app.  In some sense, Heroku is my devops support.  Server went down? Servers out of sync?  Load balancing?  Resource management?  Heroku's got that.
+
+   It felt like all I had to do was write my web app, push it to Heroku, use some addons, and now I have my startup up and running.
+
+   Where as the traditional cloud (IaaS) abstracted away hardware, Heroku aims to abstract away devops.
+
+*** Pros
+
+    - Ease of use
+
+      I felt as a developer, it's really easy to use and learn about Heroku.  10x easier than configuring AWS.  Which is 10x easier than working with bare metal hardware.  So Heroku is 100x easier to work with than buying server racks.
+
+    - Ecosystem
+
+      The modular addon system makes it easy for me to add system level functionality.  [[https://elements.heroku.com/addons/papertrail][=Papertrail=]] provides a web hosted searchable monitorable logging system.  A quick look finds database addons like [[https://elements.heroku.com/addons/jawsdb-maria][=MariaDB=]] or [[https://elements.heroku.com/addons/redistogo][=Redis=]], scaling addons like [[https://elements.heroku.com/addons/rails-autoscale][=Rails Autoscale=]], or utility addons like [[https://elements.heroku.com/addons/keen][=KeenIO=]] for metrics.  All system level stuff that would be difficult to add just in an app, but stuff that Heroku can help me with.  Really cool, and probably Heroku's competitive advantage.
+
+*** Cons
+
+    - Pricing
+
+      Heroku is /expensive/.  10 million rows of =Postgres= in Heroku is $9 a month.  A 512 RAM node is $25.  Compare to Digital Ocean, which gives 512 RAM and 20GB SSD for $5 a month.  Not to mention addons for databases and services cost money too.  I estimate the markup to about 5x.
+
+    - Flexibility
+
+      What happens when I want to do something new?  Like try out Tensorflow in a node.  I know that for Python, Heroku uses pipenv and reads the Pipfile, but what about something a bit more complex?  That would sound more difficult to get set up.  Or how about using Datomic as a data store (I didn't see that in the addons)?  Heroku definitely has some level of a vendor lock in.
+
+     
