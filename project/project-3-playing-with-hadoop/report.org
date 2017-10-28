@@ -1,0 +1,55 @@
+#+TITLE: Project 3: Playing with Hadoop
+#+SUBTITLE: Texas A&M Cloud Computing (CS489), Autumn 2017
+#+AUTHOR: Yinwei (Charlie) Zhang
+
+* Part 1: Learning Hadoop and Pig
+** Task 1: Setting up a Linux environment
+*** Time needed
+    25 minutes, mostly spend on downloading software.  I used [[http://sourabhbajaj.com/mac-setup/Vagrant/README.html][virtualbox]] with an Ubuntu 16.04 image from [[http://www.osboxes.org/ubuntu/][osboxes.org]].
+*** Encountered difficulties
+    None, I have done this before on an old computer.
+*** Snapshot
+    #+CAPTION: Screenshot of my virtualbox Ubuntu 16.04.
+    [[./img/project-3-virtualbox-ubuntu.png]]
+** Task 2: Installing Hadoop
+*** Time needed
+    50 minutes, mostly spend on downloading Hadoop, and then following the instructions from [[https://www.digitalocean.com/community/tutorials/how-to-install-hadoop-in-stand-alone-mode-on-ubuntu-16-04][/Digital Ocean's guide/]].  
+*** Encountered difficulties
+    With the guide's help, everything was very straightfoward.  I had to debug the the java home environment variables so I could run the default single node job.
+*** Snapshot
+    #+CAPTION: Screenshot of the hadoop command, indicating a successful install.
+    [[./img/project-3-hadoop-install.png]]
+** Task 3: Go though a simple Hadoop application
+*** Time needed
+    150 minutes.  Spent most of the time getting the environment right and then writing the source code and compiling.
+*** Encountered difficulties
+    I first did a test, run, downloading the source code which has the compiled jar file and source file.  That worked fine.
+
+    Compiling every from scratch was a bit troublesome.  I couldn't find the hadoop classpath or environment, since I didn't use the Cloudera VM.  Hadoop's [[https://hadoop.apache.org/docs/current/hadoop-mapreduce-client/hadoop-mapreduce-client-core/MapReduceTutorial.html][getting started tutorial]] was very helpful (I learned running hadoop className works like a charm) to get that to work.
+
+    Then I slowly wrote the source again, compiled it, then ran it again.
+*** Snapshot
+    #+CAPTION: Screenshot of the wordcount output (v1) from the Cloudera Hadoop tutorial.
+    [[./img/project-3-hadoop-tutorial.png]]
+** Task 4: Go through a simple Hadoop application using Pig
+*** Time needed
+    200 minutes.  Installing pig was a bit tough.  Couldn't compile it from scratch.  After I found a workaround, I then tried to go over the scripts to learn Pig Latin, which took the majority of the time.
+*** Encountered difficulties
+    I was able to download a compiled (jar) version of Pig and run it.  However, to build the tutorial with =ant=, I needed to build the source, which I could not (was stuck for a while).  It kept freezing on choosing between Hadoop, Spark and Hive.  It's something with the configuration that I just didn't have information on.  Google didn't help with it either.
+
+    Pig's documentation is pretty bad.  To build the tutorial tarball, you need to have the =ivy= build files.  I couldn't get that to work, but with some googling, I ran into this [[https://cwiki.apache.org/confluence/display/PIG/PigTutorial][confluence pig Tutorial]] which provided a download link.  With that, I was able to write and run the tutorial (at least the hadoop ones).  
+
+    I managed to run =script-1= and =script-2= fine, both in local mode and in Hadoop mode (in a single node cluster).  Then I went back and looked and went over the source code to learn some Pig Latin.
+*** Snapshot
+
+    #+CAPTION: Screenshot of the result from the Hadoop version of script 2.
+    [[./img/project-3-pig-tutorial-hadoop.png]]
+
+* Part 2: (Bonus) Twitter analysis with Hadoop
+  First, create an backend app that pulls data from Twitter and stores it into HDFS.  I recommend storing data in HDFS as a giant, tabular log file.  Each line can be a tab separated tweets, with the columns being meta information like users, places, hashtags, mentions etc.
+
+  The second part will be using Hadoop to process the batched information.  You could use something more abstract like Pig or Hive, but the underlying process is the same.  The idea is to take in tweets (as the key), map them to useful values, in order to reduce them to the value we want.  Here are some thoughts:
+  
+  - We want the most popular hastags in the 50 largest cities in the world.  First, you could reduce the overall list to find tweets that just are from the 50 largest cities.  Then, count the number of hashtags, similar to a wordcount.  From that, a quick sort will get you your answer.
+  - We want popular words from tweets that has an url from a popular newspaper, magazine, or TV show.  So first reduce the input tweets to the tweets from authors that are populars newspapers and TV shows.  Then do a wordcount for the tweet message to get the popular words.
+  - To find the most popular video, just reduce the tweets, filtering them to see if they have a video linked, and then by stars or number of retweets.
