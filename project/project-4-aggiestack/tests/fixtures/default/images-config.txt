@@ -1,0 +1,4 @@
+3
+linux-ubuntu /images/linux-ubuntu-v1.0.img
+linux-sles /images/old-image.img
+linux-ubuntu-16 /images/linux-ubuntu-16.img

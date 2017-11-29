@@ -7,8 +7,10 @@ name = "pypi"
 
 [packages]
 
-click = "*"
 setuptools = "*"
+click = "*"
 
 
 [dev-packages]
+
+"flake8" = "*"
