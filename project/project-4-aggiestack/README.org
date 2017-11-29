@@ -1,0 +1,51 @@
+#+TITLE: aggiestack
+
+* Time Spent
+  I definitely spent more than 20 hours, probably somewhere around 30-40 hours.  Rewrote some code so it would be easier to reread and test.  I'll time myself next time.
+
+  I also didn't commit that often, commiting only when I finished a big feature... I definitely worked throughout the week.  Need to commit more often.
+
+** Reasons
+   I was a psuedo-beginner at Python.  I used specific tools (Jupyter notebooks, pandas + matploblib + sklearn), but I didn't actually write much code in the language.  That changed in this project.  I learned how to create packages, how to do unit testing with =pytest=, using =click= to create modular CLIs, and using the standard library (I/O with Path, JSON, exceptions).  I feel pretty proud of the code I've written.
+
+   Motivation:  I never really 'learned' to use Python before, and I want to do it now (about to graduate, interested in cloud, backend web, data science).
+
+* Installation 
+  The 'offical' way to use =aggiestack= is by using setuptools like a real CLI.  If you want the develop environment, install using the =requirements.txt=.
+** Setuptools
+   The 'correct' way to install =aggiestack= as a command line interface is through setup tools.  I used [[http://click.pocoo.org/5/setuptools/#setuptools-integration][this guide]] to learn how to do it.
+   
+   #+NAME: setuptools
+   #+BEGIN_SRC bash
+   # pip, virtualenv needs to be installed from your system
+   # my testing python version is 3.6.1
+
+   virtualenv venv
+   . venv/bin/activate
+   pip install --editable .
+   #+END_SRC
+   
+   Then =aggiestack= should be installed.  We can run
+   #+NAME: aggiestack
+   #+BEGIN_SRC bash
+   aggiestack --help
+   #+END_SRC
+   to get stared.
+
+** Conda Install 
+   If you want to run the tests (=pytest=), or want the same environment I used to develop, then install using =requiremnts.txt=.  With =conda=, we can just do
+   #+NAME: aggiestack
+   #+BEGIN_SRC bash
+   conda env create -f requirements.txt
+   #+END_SRC
+   Now, instead of =aggiestack=, we type =chmod= aggiestack.py to be executable and run =aggiestack.py= instead.  For example
+   #+NAME: aggiestackpy
+   #+BEGIN_SRC bash
+   aggiestack.py --help
+   #+END_SRC
+
+* Sources
+  - The [[http://click.pocoo.org/5/][click documentation]] helped a ton.  Click is a command line interface builder in python.  This intro [[https://kushaldas.in/posts/building-command-line-tools-in-python-with-click.html][blog post]] convinced me to use it.
+  - The Python3 documentation, specifically on =pathlib= and on file handling.
+  - Vscode python, specifically using =pylint= and googling its suggestions.  (When to use =is= vs ~==~, why use ~with~ when opening files, etc.)
+  - Stackoverflow for answers from Google.
