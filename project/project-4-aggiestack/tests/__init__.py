@@ -9,6 +9,7 @@ ADMIN_JSON = FIXTURES_DIR / 'success' / 'hardware.json'
 FLAVOR_TXT = FIXTURES_DIR / 'success' / 'flavor-config.txt'
 TEST_JSON = Path(__file__).parent / 'test.json'
 
+
 def read_file(path):
     """
     loads a file from a pathlib.Path and returns the lines of the file.

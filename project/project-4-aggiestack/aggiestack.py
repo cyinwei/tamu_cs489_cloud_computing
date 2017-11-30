@@ -259,7 +259,23 @@ def server():
               help='The image (OS version) the virtual instance uses.')
 @click.option('--flavor', default='',
               help='The hardware flavor (config) the virtual instance loads on.')
-def create()
+def create(ctx, image, flavor):
+    """
+    Create a virtual server based on the image and flavor.
+    """
+    # Logging
+    success = None
+    cli_input = "{} {} {}".format(ctx.parent.parent.info_name,
+                                  ctx.paren.info_name,
+                                  ctx.info_name)
+    
+    if image != '' and flavor != '':
+        
+    else:
+        click.echo('Error, need non-empty --image and --flavor options.')
+        success = False
+    
+    _log(success, cli_input)
 
 
 cli.add_command(config)

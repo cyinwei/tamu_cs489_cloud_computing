@@ -5,3 +5,6 @@ SUCCESS: aggiestack show flavors
 SUCCESS: aggiestack config -- hardware tests/fixtures/success/hardware-config.txt
 SUCCESS: aggiestack admin show hardware
 SUCCESS: aggiestack admin show hardware
+SUCCESS: aggiestack config -- flavors 
+FAILURE: aggiestack config -- flavors 
+SUCCESS: aggiestack config -- images 

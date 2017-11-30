@@ -80,6 +80,7 @@ def write_state(data, output_path):
 
     return (True, 'success')
 
+
 def load_state(input_path):
     """
     Loads a JSON file from pathlib.Path (inpu_path) as a dict.

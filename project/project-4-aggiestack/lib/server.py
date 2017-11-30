@@ -4,10 +4,10 @@ servers.
 """
 
 
-from settings import (ADMIN_STATE_HARDWARE_FILE, IMAGE_FILE, FLAVOR_FILE,
-                      FLAVOR_KEYS)
-from admin import can_hardware_handle_flavor
-from utils.io_helpers import load_state
+from .settings import (ADMIN_STATE_HARDWARE_FILE, IMAGE_FILE, FLAVOR_FILE,
+                       FLAVOR_KEYS)
+from .admin import can_hardware_handle_flavor
+from .utils.io_helpers import load_state
 
 
 def _fcfs(flavor, hardware):
@@ -26,6 +26,8 @@ def _fcfs(flavor, hardware):
                 found_hardware += 1
         if found_hardware == len(FLAVOR_KEYS):  # if all the keys are good
             return (True, name)
+        else:
+            found_hardware = 0  # reset
 
     return (False, '')
 
@@ -40,12 +42,12 @@ def find_physical_server(flavor_name, algorithm=_fcfs,
     Returns (Success, Physical Server Name (or error message)).
     """
     # Load data
-    (query_hw, hardware) = load_state(hardware_state)
+    (query_hw, hardware, err_msg_hw) = load_state(hardware_state)
     if query_hw is False:
-        return (False, hardware)  # 'hardware' will be the error msg
-    (query_flavor, flavors) = load_state(flavors)
+        return (False, err_msg_hw)
+    (query_flavor, flavors, err_msg_flavors) = load_state(flavors)
     if query_flavor is False:
-        return (False, flavors)  # 'flavors' will be the error msg
+        return (False, err_msg_flavors)
     flavor_config = flavors[flavor_name]
 
     # Run the algorithm
