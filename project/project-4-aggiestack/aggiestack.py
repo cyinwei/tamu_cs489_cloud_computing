@@ -10,9 +10,10 @@ from lib.config_io import (import_hardware_config, import_image_config,
                            import_flavor_config, create_admin_hardware_state)
 from lib.display import display
 from lib.admin import can_hardware_handle_flavor
+from lib.server import create_server, delete_server
 from lib.settings import (LOGFILE, ADMIN_STATE_HARDWARE_FILE, HARDWARE_FILE,
                           IMAGE_FILE, FLAVOR_FILE, HARDWARE_KEYS, IMAGE_KEYS,
-                          FLAVOR_KEYS)
+                          FLAVOR_KEYS, SERVER_FILE, SERVER_KEYS)
 
 
 def _log(success, command):
@@ -24,6 +25,8 @@ def _log(success, command):
     with LOGFILE.open('a+') as log:  # + is create file if not exist
         log.write(log_str)
 
+def _log_plus(success, context):
+    pass
 
 @click.group()
 def cli():
@@ -253,34 +256,62 @@ def server():
     """
     pass
 
+
 @click.command('create')
 @click.pass_context
 @click.option('--image', default='',
               help='The image (OS version) the virtual instance uses.')
 @click.option('--flavor', default='',
-              help='The hardware flavor (config) the virtual instance loads on.')
-def create(ctx, image, flavor):
+              help='The hardware flavor the virtual instance loads on.')
+@click.argument('name')
+def server_create(ctx, image, flavor, name):
     """
     Create a virtual server based on the image and flavor.
     """
     # Logging
     success = None
     cli_input = "{} {} {}".format(ctx.parent.parent.info_name,
-                                  ctx.paren.info_name,
+                                  ctx.parent.info_name,
                                   ctx.info_name)
-    
+
     if image != '' and flavor != '':
-        
+        (success, err_msg) = create_server(name, image, flavor)
+        if success is False:
+            click.echo('Error: {}'.format(err_msg))
+        else:
+            click.echo(err_msg)  # success
     else:
         click.echo('Error, need non-empty --image and --flavor options.')
         success = False
-    
+
     _log(success, cli_input)
 
+
+@click.command('list')
+@click.pass_context
+def server_list():
+    """
+    Lists the currently active virtual servers.
+    """
+    # cli_input = "{} {} {}".format(ctx.parent.parent.info_name,
+    #                               ctx.parent.info_name,
+    #                               ctx.info_name)
+    (success, data) = display(SERVER_FILE, SERVER_KEYS)
+    # display data and log
+    if success is True:
+        click.echo('Currently active virtual servers:')
+        click.echo(data)
+    else:
+        click.echo('Error: Could not list virtual servers.  '
+                   'Reasons:')
+        click.echo(data)
+    _log(success, cli_input)
+    
 
 cli.add_command(config)
 cli.add_command(show)
 cli.add_command(admin)
+cli.add_command(server)
 
 admin_show.add_command(show_hardware)
 
@@ -291,6 +322,10 @@ show.add_command(show_hardware)
 show.add_command(show_images)
 show.add_command(show_flavors)
 show.add_command(show_all)
+
+server.add_command(server_create)
+server.add_command(server_list)
+
 
 if __name__ == '__main__':
     cli()

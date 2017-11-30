@@ -7,8 +7,9 @@ from pathlib import Path
 
 # keys for the dicts/JSON state objects
 HARDWARE_KEYS = ('ip', 'mem', 'disk', 'vcpu')
-IMAGE_KEYS = ('path', ) # need the , to be a tuple
+IMAGE_KEYS = ('path', )  # need the , to be a tuple
 FLAVOR_KEYS = ('mem', 'disk', 'vcpu')
+SERVER_KEYS = ('image', 'flavor', 'hardware')
 
 # directory information
 STATE_DIR = Path(__file__).parent.parent / '.aggiestack'
@@ -21,6 +22,9 @@ FLAVOR_FILE = CONFIG_DIR / 'flavor.json'
 
 # admin state (current state usage) file
 ADMIN_STATE_HARDWARE_FILE = STATE_DIR / 'hardware_state.json'
+
+# server list state file
+SERVER_FILE = STATE_DIR / 'server_list.json'
 
 # log file information
 LOGFILE_NAME = 'aggiestack-log.txt'

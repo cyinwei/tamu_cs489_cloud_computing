@@ -63,7 +63,7 @@ def get_table(data, keys, translations=None):
     else:
         keynames = [translations[key] for key in keys]
 
-    header = ("Name", ) + keynames # Name is the first column
+    header = ("name", ) + keynames  # Name is the first column
     body = _generate_body(data)
 
     # Then format our list of lines (header + body)

@@ -8,3 +8,8 @@ SUCCESS: aggiestack admin show hardware
 SUCCESS: aggiestack config -- flavors 
 FAILURE: aggiestack config -- flavors 
 SUCCESS: aggiestack config -- images 
+SUCCESS: aggiestack admin show hardware
+SUCCESS: aggiestack admin show hardware
+FAILURE: aggiestack server create
+SUCCESS: aggiestack show all
+SUCCESS: aggiestack server create

@@ -3,12 +3,13 @@ Does the I/O (read file -> state), write the state to a file.
 """
 import json
 
+
 def parse_config_line(line, keys):
     """
     Given a single configuration (line), add a key to dict with key: name and
     value: dict with keys corresponding to the configurations.
     """
-    terms = line.split() # by whitespace
+    terms = line.split()  # by whitespace
     name = terms[0]
     values = terms[1:]
 
@@ -25,6 +26,7 @@ def parse_config_line(line, keys):
         config[key] = value
 
     return (name, config)
+
 
 def read_config_file(path, config_keys, check_fn):
     """
@@ -53,6 +55,7 @@ def read_config_file(path, config_keys, check_fn):
         config[name] = line_config
 
     return (True, config, 'Success.')
+
 
 def write_state(data, output_path):
     """
