@@ -1,2 +1,7 @@
 SUCCESS: aggiestack.py admin can_host can_host m1 large
 SUCCESS: aggiestack.py admin can_host m1 large
+SUCCESS: aggiestack show all
+SUCCESS: aggiestack show flavors
+SUCCESS: aggiestack config -- hardware tests/fixtures/success/hardware-config.txt
+SUCCESS: aggiestack admin show hardware
+SUCCESS: aggiestack admin show hardware

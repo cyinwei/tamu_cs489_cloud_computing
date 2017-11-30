@@ -10,9 +10,10 @@ from lib.config_io import (import_hardware_config, import_image_config,
                            import_flavor_config, create_admin_hardware_state)
 from lib.display import display
 from lib.admin import can_hardware_handle_flavor
-from lib.settings import (LOGFILE, ADMIN_HARDWARE_FILE, HARDWARE_FILE,
+from lib.settings import (LOGFILE, ADMIN_STATE_HARDWARE_FILE, HARDWARE_FILE,
                           IMAGE_FILE, FLAVOR_FILE, HARDWARE_KEYS, IMAGE_KEYS,
                           FLAVOR_KEYS)
+
 
 def _log(success, command):
     log_str = None
@@ -20,17 +21,17 @@ def _log(success, command):
         log_str = 'SUCCESS: ' + command + '\n'
     else:
         log_str = 'FAILURE: ' + command + '\n'
-    with LOGFILE.open('a+') as log: # + is create file if not exist
+    with LOGFILE.open('a+') as log:  # + is create file if not exist
         log.write(log_str)
+
 
 @click.group()
 def cli():
     """
     Our command line interface (CLI) implemented in click.
-    NOTE: aggiestack doesn't any default configs without commands, so this is
-    empty.
     """
     pass
+
 
 @click.command()
 @click.pass_context
@@ -51,7 +52,7 @@ def config(ctx, hardware, images, flavors):
         if success is True:
             # don't print anything, just log
             (ad_s, ad_err_msg) = create_admin_hardware_state(HARDWARE_FILE,
-                                                             ADMIN_HARDWARE_FILE)
+                                                             ADMIN_STATE_HARDWARE_FILE)
             if ad_s is False:
                 click.echo("Error: Couldn't create admin state... Reason:")
                 click.echo(ad_err_msg)
@@ -85,11 +86,13 @@ def config(ctx, hardware, images, flavors):
             click.echo(err_msg)
             _log(False, cli_input)
 
+
 @click.group()
 def show():
     """
     Show the current configuration.
     """
+
 
 @click.command('hardware')
 @click.pass_context
@@ -108,7 +111,7 @@ def show_hardware(ctx):
                                          ctx.parent.info_name,
                                          ctx.info_name)
         table_info = 'Available current (admin) hardware configurations:'
-        (success, data) = display(ADMIN_HARDWARE_FILE, HARDWARE_KEYS)
+        (success, data) = display(ADMIN_STATE_HARDWARE_FILE, HARDWARE_KEYS)
     else:
         cli_input = "{} {} {}".format(ctx.parent.parent.info_name,
                                       ctx.parent.info_name,
@@ -123,7 +126,8 @@ def show_hardware(ctx):
         click.echo('Error: Could not display configurations for hardware.  Reasons:')
         click.echo(data)
     _log(success, cli_input)
-   
+
+
 @click.command('images')
 @click.pass_context
 def show_images(ctx):
@@ -143,6 +147,7 @@ def show_images(ctx):
         click.echo(data)
     _log(success, cli_input)
 
+
 @click.command('flavors')
 @click.pass_context
 def show_flavors(ctx):
@@ -161,6 +166,7 @@ def show_flavors(ctx):
         click.echo('Error: Could not display configurations for flavors.  Reasons:')
         click.echo(data)
     _log(success, cli_input)
+
 
 @click.command('all')
 @click.pass_context
@@ -200,6 +206,7 @@ def show_all(ctx):
 
     _log(success, cli_input)
 
+
 @click.group()
 def admin():
     """
@@ -207,12 +214,14 @@ def admin():
     """
     pass
 
+
 @click.group('show')
 def admin_show():
     """
     Displays admin configurations [just hardware right now].
     """
     pass
+
 
 @click.command()
 @click.argument('names', nargs=2)
@@ -223,18 +232,35 @@ def can_host(ctx, names):
     """
     (machine_name, flavor) = names
     cli_input = "{} {} {} {} {}".format(ctx.parent.parent.info_name,
-                                                 ctx.parent.info_name,
-                                                 ctx.info_name,
-                                                 machine_name,
-                                                 flavor)
+                                        ctx.parent.info_name,
+                                        ctx.info_name,
+                                        machine_name,
+                                        flavor)
     (success, can_handle, msg) = can_hardware_handle_flavor(machine_name, flavor)
     if success is True:
         # the msg already has our contents
-        click.echo(str(can_handle) + ': ' +  msg)
+        click.echo(str(can_handle) + ': ' + msg)
     else:
         click.echo("Error: Cannot check if hardware can host flavor.  Reason:")
         click.echo(msg)
     _log(success, cli_input)
+
+
+@click.group('server')
+def server():
+    """
+    Create or delete virtual servers based on the available hardware.
+    """
+    pass
+
+@click.command('create')
+@click.pass_context
+@click.option('--image', default='',
+              help='The image (OS version) the virtual instance uses.')
+@click.option('--flavor', default='',
+              help='The hardware flavor (config) the virtual instance loads on.')
+def create()
+
 
 cli.add_command(config)
 cli.add_command(show)

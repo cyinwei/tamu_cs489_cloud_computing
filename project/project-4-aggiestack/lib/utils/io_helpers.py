@@ -61,7 +61,8 @@ def write_state(data, output_path):
     # wipes old state if it exists
     if output_path.exists() is True:
         if output_path.is_dir():
-            err_msg = "Error: {} is a directory, can't overwrite it".format(output_path)
+            err_msg = ("Error: {} is a directory, can't overwrite "
+                       "it.").format(output_path)
             return (False, err_msg)
         output_path.unlink()
 

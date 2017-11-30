@@ -3,8 +3,7 @@ Displays the state of a configuration (hardware, image, flavor) based on the
 stored state.
 """
 from lib.utils.io_helpers import load_state
-from lib.settings import (HARDWARE_FILE, IMAGE_FILE, FLAVOR_FILE,
-                          HARDWARE_KEYS, IMAGE_KEYS, FLAVOR_KEYS)
+
 
 def _generate_body(data):
     """
@@ -26,6 +25,7 @@ def _generate_body(data):
 
     return body
 
+
 def _find_maxwidths(header, body):
     """
     Finds the max width of each column in the output table by looking at the
@@ -35,13 +35,14 @@ def _find_maxwidths(header, body):
     maxwidths = []
     for column_name in header:
         maxwidths.append(len(column_name))
-    
+
     for row in body:
         for i, elem in enumerate(row):
             if (maxwidths[i] < len(str(elem))):
                 maxwidths[i] = len(str(elem))
 
     return maxwidths
+
 
 def get_table(data, keys, translations=None):
     """
@@ -87,6 +88,7 @@ def get_table(data, keys, translations=None):
         formatted_lines.append(row_formatted.format(*row))
 
     return '\n'.join(formatted_lines)
+
 
 def display(state_path, keys):
     (success, data, err_msg) = load_state(state_path)

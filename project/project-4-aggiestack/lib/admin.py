@@ -1,11 +1,11 @@
 """
 Implements the functionality we expect from the 'aggiestack admin ' command.
 """
-from lib.settings import ADMIN_HARDWARE_FILE, FLAVOR_FILE
+from lib.settings import ADMIN_STATE_HARDWARE_FILE, FLAVOR_FILE
 from lib.utils.io_helpers import load_state
 
 def can_hardware_handle_flavor(machine_name, flavor_name,
-                               hw_file=ADMIN_HARDWARE_FILE,
+                               hw_file=ADMIN_STATE_HARDWARE_FILE,
                                fl_file=FLAVOR_FILE):
     """
     Checks if a given hardware config can handle a flavor size.

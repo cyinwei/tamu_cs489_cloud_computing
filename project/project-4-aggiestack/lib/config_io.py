@@ -3,7 +3,7 @@ Handles the configuration I/O (aggiestack config --?) logic.
 """
 from lib.settings import (HARDWARE_KEYS, IMAGE_KEYS,
                           FLAVOR_KEYS, HARDWARE_FILE,
-                          IMAGE_FILE, FLAVOR_FILE, ADMIN_HARDWARE_FILE)
+                          IMAGE_FILE, FLAVOR_FILE, ADMIN_STATE_HARDWARE_FILE)
 from lib.utils.io_helpers import (read_config_file, load_state, write_state)
 from lib.utils.check_config_inputs import (check_hardware_config_file,
                                            check_image_config_file,
@@ -41,7 +41,7 @@ def import_flavor_config(input_path, output_path=FLAVOR_FILE):
     return write_state(data, output_path)
 
 def create_admin_hardware_state(input_p=HARDWARE_FILE,
-                                output_p=ADMIN_HARDWARE_FILE):
+                                output_p=ADMIN_STATE_HARDWARE_FILE):
     """
     Given a config --hardware HARDWARE_FILE state, we make a copy of it and
     place the state in output_p.

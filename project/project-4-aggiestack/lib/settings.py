@@ -12,13 +12,16 @@ FLAVOR_KEYS = ('mem', 'disk', 'vcpu')
 
 # directory information
 STATE_DIR = Path(__file__).parent.parent / '.aggiestack'
-HARDWARE_FILE = STATE_DIR / 'hardware.json'
-IMAGE_FILE = STATE_DIR / 'image.json'
-FLAVOR_FILE = STATE_DIR / 'flavor.json'
+CONFIG_DIR = STATE_DIR / 'configurations'
+
+# configuration files
+HARDWARE_FILE = CONFIG_DIR / 'hardware.json'
+IMAGE_FILE = CONFIG_DIR / 'image.json'
+FLAVOR_FILE = CONFIG_DIR / 'flavor.json'
+
+# admin state (current state usage) file
+ADMIN_STATE_HARDWARE_FILE = STATE_DIR / 'hardware_state.json'
 
 # log file information
 LOGFILE_NAME = 'aggiestack-log.txt'
 LOGFILE = Path(__file__).parent.parent / LOGFILE_NAME
-
-# admin file information
-ADMIN_HARDWARE_FILE = STATE_DIR / 'admin_hardware.json'
