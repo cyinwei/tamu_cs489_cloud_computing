@@ -5,7 +5,7 @@ stored state.
 from lib.utils.io_helpers import load_state
 
 
-def _generate_body(data):
+def _generate_body(data, keys):
     """
     Generate the body (all the rows after the column names) as a list of
     lines.  Each line is a list of row elements to be formatted.
@@ -17,7 +17,7 @@ def _generate_body(data):
     for line in lines:
         row = [line] # first row elem, the name of the config
         terms_dict = data[line] # rest of the row elems
-        for term_key in list(terms_dict):
+        for term_key in keys:
             term = terms_dict[term_key]
             row.append(term)
 
@@ -52,9 +52,9 @@ def get_table(data, keys, translations=None):
 
     # First get the data into a list of rows to print
     if data is None:
-        return ''
-    if not data:
-        return ''
+        return 'NONE.'
+    if not data:  # empty {} evaluates to False
+        return 'NONE.'
 
     # get the column names, which is the first row / header
     keynames = None
@@ -64,7 +64,7 @@ def get_table(data, keys, translations=None):
         keynames = [translations[key] for key in keys]
 
     header = ("name", ) + keynames  # Name is the first column
-    body = _generate_body(data)
+    body = _generate_body(data, keys)
 
     # Then format our list of lines (header + body)
 

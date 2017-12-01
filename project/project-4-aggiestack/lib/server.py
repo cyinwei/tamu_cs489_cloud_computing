@@ -37,7 +37,7 @@ def create_server(name, image, flavor,
     if not sv_success:
         return (False, err_msg_sv)
 
-    return (True, 'Successfully created virtual server {}.'.format(name))
+    return (True, 'Successfully created virtual server [{}].'.format(name))
 
 
 def delete_server(name, server_list_file=SERVER_FILE,
@@ -65,4 +65,4 @@ def delete_server(name, server_list_file=SERVER_FILE,
     if sv_success is False:
         return (False, err_msg_sv)
 
-    return (True, 'Removed server [{}]'.format(name))
+    return (True, 'Removed server [{}].'.format(name))

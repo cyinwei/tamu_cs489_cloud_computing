@@ -13,7 +13,7 @@ from lib.admin import can_hardware_handle_flavor
 from lib.server import create_server, delete_server
 from lib.settings import (LOGFILE, ADMIN_STATE_HARDWARE_FILE, HARDWARE_FILE,
                           IMAGE_FILE, FLAVOR_FILE, HARDWARE_KEYS, IMAGE_KEYS,
-                          FLAVOR_KEYS, SERVER_FILE, SERVER_KEYS)
+                          FLAVOR_KEYS, SERVER_FILE, SERVER_KEYS, INSTANCE_KEYS)
 
 
 def _log(success, command):
@@ -25,8 +25,6 @@ def _log(success, command):
     with LOGFILE.open('a+') as log:  # + is create file if not exist
         log.write(log_str)
 
-def _log_plus(success, context):
-    pass
 
 @click.group()
 def cli():
@@ -49,7 +47,7 @@ def config(ctx, hardware, images, flavors):
     cli_input_base = "{} {} ".format(ctx.parent.info_name,
                                      ctx.info_name)
     if hardware != '':
-        cli_input = cli_input_base + "-- hardware {}".format(hardware)
+        cli_input = cli_input_base + "--hardware {}".format(hardware)
         path = Path(hardware)
         (success, err_msg) = import_hardware_config(path)
         if success is True:
@@ -66,7 +64,7 @@ def config(ctx, hardware, images, flavors):
             _log(False, cli_input)
 
     if images != '':
-        cli_input = cli_input_base + "-- images {}".format(hardware)
+        cli_input = cli_input_base + "--images {}".format(hardware)
         path = Path(images)
         (success, err_msg) = import_image_config(path)
         if success is True:
@@ -78,7 +76,7 @@ def config(ctx, hardware, images, flavors):
             _log(False, cli_input)
 
     if flavors != '':
-        cli_input = cli_input_base + "-- flavors {}".format(hardware)
+        cli_input = cli_input_base + "-- flavors{}".format(hardware)
         path = Path(flavors)
         (success, err_msg) = import_flavor_config(path)
         if success is True:
@@ -126,7 +124,8 @@ def show_hardware(ctx):
         click.echo(table_info)
         click.echo(data)
     else:
-        click.echo('Error: Could not display configurations for hardware.  Reasons:')
+        click.echo('Error: Could not display configurations for hardware. '
+                   'Reasons:')
         click.echo(data)
     _log(success, cli_input)
 
@@ -137,17 +136,18 @@ def show_images(ctx):
     """
     Displays the available image configurations.
     """
-    cli_input = "{} {} {}".format(ctx.parent.parent.info_name,
-                                  ctx.parent.info_name,
-                                  ctx.info_name)
     (success, data) = display(IMAGE_FILE, IMAGE_KEYS)
     # display data and log
     if success is True:
         click.echo('Available base images configurations:')
         click.echo(data)
     else:
-        click.echo('Error: Could not display configurations for images.  Reasons:')
+        click.echo('Error: Could not display configurations for images. '
+                   'Reasons:')
         click.echo(data)
+    cli_input = "{} {} {}".format(ctx.parent.parent.info_name,
+                                  ctx.parent.info_name,
+                                  ctx.info_name)
     _log(success, cli_input)
 
 
@@ -157,9 +157,6 @@ def show_flavors(ctx):
     """
     Displays the available flavor configurations.
     """
-    cli_input = "{} {} {}".format(ctx.parent.parent.info_name,
-                                  ctx.parent.info_name,
-                                  ctx.info_name)
     (success, data) = display(FLAVOR_FILE, FLAVOR_KEYS)
     # display data and log
     if success is True:
@@ -168,6 +165,9 @@ def show_flavors(ctx):
     else:
         click.echo('Error: Could not display configurations for flavors.  Reasons:')
         click.echo(data)
+    cli_input = "{} {} {}".format(ctx.parent.parent.info_name,
+                                  ctx.parent.info_name,
+                                  ctx.info_name)
     _log(success, cli_input)
 
 
@@ -177,9 +177,6 @@ def show_all(ctx):
     """
     Displays all the available configurations.
     """
-    cli_input = "{} {} {}".format(ctx.parent.parent.info_name,
-                                  ctx.parent.info_name,
-                                  ctx.info_name)
     (hw_success, hw_data) = display(HARDWARE_FILE, HARDWARE_KEYS)
     (im_success, im_data) = display(IMAGE_FILE, IMAGE_KEYS)
     (fl_success, fl_data) = display(FLAVOR_FILE, FLAVOR_KEYS)
@@ -206,7 +203,9 @@ def show_all(ctx):
         if fl_success is False:
             click.echo('Error: when displaying flavors config:')
             click.echo(fl_data)
-
+    cli_input = "{} {} {}".format(ctx.parent.parent.info_name,
+                                  ctx.parent.info_name,
+                                  ctx.info_name)
     _log(success, cli_input)
 
 
@@ -221,9 +220,33 @@ def admin():
 @click.group('show')
 def admin_show():
     """
-    Displays admin configurations [just hardware right now].
+    Displays admin configurations, or the current usage of servers and
+    hardware.
     """
     pass
+
+
+@click.command('instances')
+@click.pass_context
+def show_instances(ctx):
+    """
+    Shows where (hardware) each instance is running on.
+    """
+    (success, data) = display(SERVER_FILE, INSTANCE_KEYS)
+    # display data and log
+    if success is True:
+        click.echo('Currently active virtual servers and their physical '
+                   'server locations (hardware).')
+        click.echo(data)
+    else:
+        click.echo('Error: Could not list virtual servers.  '
+                   'Reasons:')
+        click.echo(data)
+    cli_input = "{} {} {} {}".format(ctx.parent.parent.parent.info_name,
+                                     ctx.parent.parent.info_name,
+                                     ctx.parent.info_name,
+                                     ctx.info_name)
+    _log(success, cli_input)
 
 
 @click.command()
@@ -239,7 +262,8 @@ def can_host(ctx, names):
                                         ctx.info_name,
                                         machine_name,
                                         flavor)
-    (success, can_handle, msg) = can_hardware_handle_flavor(machine_name, flavor)
+    (success, can_handle, msg) = can_hardware_handle_flavor(machine_name,
+                                                            flavor)
     if success is True:
         # the msg already has our contents
         click.echo(str(can_handle) + ': ' + msg)
@@ -270,21 +294,20 @@ def server_create(ctx, image, flavor, name):
     """
     # Logging
     success = None
-    cli_input = "{} {} {}".format(ctx.parent.parent.info_name,
-                                  ctx.parent.info_name,
-                                  ctx.info_name)
-
-    if image != '' and flavor != '':
+    base_cli_input = "{} {} {}".format(ctx.parent.parent.info_name,
+                                       ctx.parent.info_name,
+                                       ctx.info_name)
+    if image != '' and flavor != '' and name != '':
+        option_cli_input = ' --image {} --flavor {} {}'.format(image,
+                                                              flavor,
+                                                              name)
         (success, err_msg) = create_server(name, image, flavor)
-        if success is False:
-            click.echo('Error: {}'.format(err_msg))
-        else:
-            click.echo(err_msg)  # success
+        click.echo(err_msg)  # err_msg contains the results of the create().
     else:
-        click.echo('Error, need non-empty --image and --flavor options.')
+        click.echo('Error, need non-empty --image and --flavor options, '
+                   'along with an unique instance name.')
         success = False
-
-    _log(success, cli_input)
+    _log(success, base_cli_input + option_cli_input)
 
 
 @click.command('list')
@@ -293,9 +316,6 @@ def server_list(ctx):
     """
     Lists the currently active virtual servers.
     """
-    cli_input = "{} {} {}".format(ctx.parent.parent.info_name,
-                                  ctx.parent.info_name,
-                                  ctx.info_name)
     (success, data) = display(SERVER_FILE, SERVER_KEYS)
     # display data and log
     if success is True:
@@ -305,8 +325,11 @@ def server_list(ctx):
         click.echo('Error: Could not list virtual servers.  '
                    'Reasons:')
         click.echo(data)
+    cli_input = "{} {} {}".format(ctx.parent.parent.info_name,
+                                  ctx.parent.info_name,
+                                  ctx.info_name) 
     _log(success, cli_input)
-    
+
 
 @click.command('delete')
 @click.pass_context
@@ -315,9 +338,10 @@ def server_delete(ctx, instance):
     """
     Removes the INSTANCE from the active virtual server list.
     """
-    cli_input = "{} {} {}".format(ctx.parent.parent.info_name,
-                                  ctx.parent.info_name,
-                                  ctx.info_name)
+    cli_input = "{} {} {} {}".format(ctx.parent.parent.info_name,
+                                     ctx.parent.info_name,
+                                     ctx.info_name,
+                                     instance)
     (success, msg) = delete_server(instance)
     click.echo(msg)
     _log(success, cli_input)
@@ -329,6 +353,7 @@ cli.add_command(admin)
 cli.add_command(server)
 
 admin_show.add_command(show_hardware)
+admin_show.add_command(show_instances)
 
 admin.add_command(admin_show)
 admin.add_command(can_host)

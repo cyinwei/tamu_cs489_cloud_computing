@@ -9,7 +9,8 @@ from pathlib import Path
 HARDWARE_KEYS = ('ip', 'mem', 'disk', 'vcpu')
 IMAGE_KEYS = ('path', )  # need the , to be a tuple
 FLAVOR_KEYS = ('mem', 'disk', 'vcpu')
-SERVER_KEYS = ('image', 'flavor', 'hardware')
+SERVER_KEYS = ('image', 'flavor')
+INSTANCE_KEYS = ('hardware', )
 
 # directory information
 STATE_DIR = Path(__file__).parent.parent / '.aggiestack'
