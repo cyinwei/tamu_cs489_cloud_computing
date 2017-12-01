@@ -7,12 +7,13 @@ from lib.utils.server_helpers import (find_physical_server,
                                       server_list_append,
                                       server_list_delete,
                                       shape_server)
+from lib.utils.io_helpers import load_state
 from lib.settings import ADMIN_STATE_HARDWARE_FILE, SERVER_FILE
 
 
 def create_server(name, image, flavor,
-                  hardware_state=ADMIN_STATE_HARDWARE_FILE,
-                  server_state=SERVER_FILE):
+                  hardware_state_file=ADMIN_STATE_HARDWARE_FILE,
+                  server_list_file=SERVER_FILE):
     """
     Creates/Instantiates a virtual server based on the size (flavor) and OS
     (image).
@@ -25,11 +26,43 @@ def create_server(name, image, flavor,
         return (False, hardware_name)  # hw_name will be the error msg here
 
     # Update the current hardware state and the server list
-    update_physical_server(flavor, hardware_name)
-    server_list_append(shape_server(name, image, flavor, hardware_name))
+    (hw_success, err_msg_hw) = update_physical_server(flavor, hardware_name,
+                                                      True)
+    if not hw_success:
+        return (False, err_msg_hw)
+    (sv_success, err_msg_sv) = server_list_append(shape_server(name,
+                                                               image,
+                                                               flavor,
+                                                               hardware_name))
+    if not sv_success:
+        return (False, err_msg_sv)
 
     return (True, 'Successfully created virtual server {}.'.format(name))
 
 
-def delete_server(name):
-    return server_list_delete(name)
+def delete_server(name, server_list_file=SERVER_FILE,
+                  hardware_state_file=ADMIN_STATE_HARDWARE_FILE):
+    """
+    Deletes a virtual server by its instance name.
+    """
+    (sv_read_success, sv_data, err_msg_read) = load_state(server_list_file)
+    if sv_read_success is False:
+        return (False, err_msg_read)
+
+    # check if the name exists
+    if sv_data.get(name) is None:
+        return (False, 'Error: Server [{}] does not exist.'.format(name))
+
+    # grab flavor and hardware data from the server list
+    flavor = sv_data[name]['flavor']
+    hardware = sv_data[name]['hardware']
+
+    # update the hardware state and server list
+    (hw_success, err_msg_hw) = update_physical_server(flavor, hardware, False)
+    if hw_success is False:
+        return (False, err_msg_hw)
+    (sv_success, err_msg_sv) = server_list_delete(name)
+    if sv_success is False:
+        return (False, err_msg_sv)
+
+    return (True, 'Removed server [{}]'.format(name))

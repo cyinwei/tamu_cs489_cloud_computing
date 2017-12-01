@@ -13,3 +13,89 @@ SUCCESS: aggiestack admin show hardware
 FAILURE: aggiestack server create
 SUCCESS: aggiestack show all
 SUCCESS: aggiestack server create
+SUCCESS: aggiestack config -- hardware tests/fixtures/success/hardware-config.txt
+SUCCESS: aggiestack server create
+SUCCESS: aggiestack server create
+SUCCESS: aggiestack server list
+SUCCESS: aggiestack server list
+SUCCESS: aggiestack server delete
+SUCCESS: aggiestack server delete
+FAILURE: aggiestack server create
+FAILURE: aggiestack server create
+FAILURE: aggiestack server create
+FAILURE: aggiestack server create
+SUCCESS: aggiestack server create
+SUCCESS: aggiestack server create
+SUCCESS: aggiestack server create
+SUCCESS: aggiestack server create
+SUCCESS: aggiestack server create
+SUCCESS: aggiestack server create
+SUCCESS: aggiestack server create
+SUCCESS: aggiestack server list
+FAILURE: aggiestack server create
+SUCCESS: aggiestack admin show hardware
+SUCCESS: aggiestack admin show hardware
+FAILURE: aggiestack server create
+SUCCESS: aggiestack server create
+SUCCESS: aggiestack server create
+SUCCESS: aggiestack server create
+FAILURE: aggiestack server create
+FAILURE: aggiestack server create
+FAILURE: aggiestack server create
+SUCCESS: aggiestack config -- hardware tests/fixtures/success/hardware-config.txt
+FAILURE: aggiestack server create
+FAILURE: aggiestack server create
+SUCCESS: aggiestack server delete
+SUCCESS: aggiestack server list
+SUCCESS: aggiestack server create
+FAILURE: aggiestack server create
+FAILURE: aggiestack server create
+SUCCESS: aggiestack admin show hardware
+FAILURE: aggiestack server delete
+SUCCESS: aggiestack server delete
+SUCCESS: aggiestack admin show hardware
+SUCCESS: aggiestack config -- hardware tests/fixtures/success/hardware-config.txt
+SUCCESS: aggiestack admin show hardware
+SUCCESS: aggiestack server create
+FAILURE: aggiestack server create
+FAILURE: aggiestack server create
+SUCCESS: aggiestack admin show hardware
+SUCCESS: aggiestack server delete
+SUCCESS: aggiestack admin show hardware
+SUCCESS: aggiestack show hardware
+SUCCESS: aggiestack show flavors
+FAILURE: aggiestack server delete
+FAILURE: aggiestack server delete
+SUCCESS: aggiestack server create
+SUCCESS: aggiestack server list
+SUCCESS: aggiestack admin show hardware
+SUCCESS: aggiestack config -- hardware tests/fixtures/success/hardware-config.txt
+SUCCESS: aggiestack admin show hardware
+SUCCESS: aggiestack admin show hardware
+FAILURE: aggiestack server create
+SUCCESS: aggiestack server create
+SUCCESS: aggiestack admin show hardware
+SUCCESS: aggiestack config -- hardware tests/fixtures/success/hardware-config.txt
+SUCCESS: aggiestack server create
+SUCCESS: aggiestack admin show hardware
+SUCCESS: aggiestack server create
+SUCCESS: aggiestack server delete
+SUCCESS: aggiestack admin show hardware
+SUCCESS: aggiestack server delete
+SUCCESS: aggiestack admin show hardware
+SUCCESS: aggiestack config -- hardware tests/fixtures/success/hardware-config.txt
+SUCCESS: aggiestack config -- hardware tests/fixtures/success/hardware-config.txt
+SUCCESS: aggiestack admin show hardware
+SUCCESS: aggiestack server create
+SUCCESS: aggiestack server list
+SUCCESS: aggiestack admin show hardware
+SUCCESS: aggiestack server create
+FAILURE: aggiestack server create
+SUCCESS: aggiestack server list
+SUCCESS: aggiestack server delete
+SUCCESS: aggiestack server list
+SUCCESS: aggiestack server list
+SUCCESS: aggiestack server delete
+FAILURE: aggiestack server delete
+FAILURE: aggiestack server delete
+FAILURE: aggiestack server delete

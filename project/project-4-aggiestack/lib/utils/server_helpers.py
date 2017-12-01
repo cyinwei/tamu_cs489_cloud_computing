@@ -24,6 +24,12 @@ def server_list_append(server, servers_p=SERVER_FILE):
     else:
         data = {}
 
+    # Check for same name collisions
+    for name in server:
+        if data.get(name) is not None:
+            return (False, 'Could not create server [{}], since there is '
+                    'another virtual server with the same name'.format(name))
+
     data.update(server)
     (w_success, err_msg) = write_state(data, servers_p)
     if w_success is False:
@@ -38,17 +44,13 @@ def server_list_delete(server_name, servers_p=SERVER_FILE):
     true if the name doesn't exist.
     """
     if servers_p.exists() is False:
-        return (False, 'Server state file: {} '
+        return (False, 'Error: Virtual server state file: {} '
                 'does not exist.'.format(str(servers_p)))
     (r_success, data, err_msg) = load_state(servers_p)
     if r_success is False:
         return (False, 'Could not delete server.  Reason\n' + err_msg)
 
-    if data.get(server_name) is None:
-        return (True, 'Server: {} does not exist.  '
-                'Nothing to do.'.format(server_name))
-
-    data.pop(server_name)
+    data.pop(server_name, None)
     write_state(data, SERVER_FILE)
     return (True, 'Deleted {} from the server list.'.format(server_name))
 
@@ -97,13 +99,14 @@ def find_physical_server(flavor_name, algorithm=_fcfs,
     (found, hw_name) = algorithm(flavor_config, hardware)
 
     if found is False:
-        return (False, ('No suitable physical server'
+        return (False, ('Error: No suitable physical server '
                         '(hardware) for flavor: {}'.format(flavor_name)))
 
     return (True, hw_name)
 
 
 def update_physical_server(flavor_name, phys_server_name,
+                           subtract=True,
                            flavor_state=FLAVOR_FILE,
                            flavor_keys=FLAVOR_KEYS,
                            hardware_state=ADMIN_STATE_HARDWARE_FILE):
@@ -117,22 +120,31 @@ def update_physical_server(flavor_name, phys_server_name,
     (r_success_hw, hardwares, err_msg_hw) = load_state(hardware_state)
 
     flavor = flavors[flavor_name]
-    phys_server =  hardwares[phys_server_name]
+    phys_server = hardwares[phys_server_name]
 
-    matches = 0
+    # check if can 'subtract' and end up with nonnegative resources
+    if subtract:
+        matches = 0
+        for key in flavor_keys:
+            if phys_server[key] >= flavor[key]:
+                matches += 1
+        if matches != len(flavor_keys):
+            return (False, 'Error: Cannot update hardware state:\n'
+                    'One or more fields in the hardware is less than the '
+                    'flavor requirements')
+
     for key in flavor_keys:
-        if phys_server[key] >= flavor[key]:
-            matches += 1
-    if matches != len(flavor_keys):
-        return (False, 'One or more fields in the hardware is less than the '
-                'flavor requirements')
-    
-    for key in flavor_keys:
-        phys_server[key] -= flavor[key]
-    
-    hardwares.update(phys_server)
+        if subtract:
+            phys_server[key] -= flavor[key]
+        else:
+            phys_server[key] += flavor[key]
+
+    phys_server_entry = {phys_server_name: phys_server}
+    hardwares.update(phys_server_entry)
     (w_success_hw, err_msg_write_hw) = write_state(hardwares,
                                                    ADMIN_STATE_HARDWARE_FILE)
     if w_success_hw is False:
-        return (False, 'Failed when writing to state in update_server(). '
-                       'Reason:\n' + err_msg_write_hw)
+        return (False, 'Error: Failed when writing to state in update_server()'
+                       '. Reason:\n' + err_msg_write_hw)
+
+    return (True, 'Successfully updated physical server.')

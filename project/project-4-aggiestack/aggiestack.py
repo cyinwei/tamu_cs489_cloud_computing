@@ -289,13 +289,13 @@ def server_create(ctx, image, flavor, name):
 
 @click.command('list')
 @click.pass_context
-def server_list():
+def server_list(ctx):
     """
     Lists the currently active virtual servers.
     """
-    # cli_input = "{} {} {}".format(ctx.parent.parent.info_name,
-    #                               ctx.parent.info_name,
-    #                               ctx.info_name)
+    cli_input = "{} {} {}".format(ctx.parent.parent.info_name,
+                                  ctx.parent.info_name,
+                                  ctx.info_name)
     (success, data) = display(SERVER_FILE, SERVER_KEYS)
     # display data and log
     if success is True:
@@ -307,6 +307,21 @@ def server_list():
         click.echo(data)
     _log(success, cli_input)
     
+
+@click.command('delete')
+@click.pass_context
+@click.argument('instance')
+def server_delete(ctx, instance):
+    """
+    Removes the INSTANCE from the active virtual server list.
+    """
+    cli_input = "{} {} {}".format(ctx.parent.parent.info_name,
+                                  ctx.parent.info_name,
+                                  ctx.info_name)
+    (success, msg) = delete_server(instance)
+    click.echo(msg)
+    _log(success, cli_input)
+
 
 cli.add_command(config)
 cli.add_command(show)
@@ -325,7 +340,7 @@ show.add_command(show_all)
 
 server.add_command(server_create)
 server.add_command(server_list)
-
+server.add_command(server_delete)
 
 if __name__ == '__main__':
     cli()
