@@ -7,8 +7,14 @@ from lib.settings import (
     FLAVOR_FILE,
     SERVER_FILE
 )
-from lib.utils.io_helpers import load_state
+from lib.utils.io_helpers import load_state, write_state
 from lib.utils.server_helpers import server_list_delete
+from lib.utils.check_config_inputs import (
+    _check_num,
+    _check_ip_addr,
+    _check_rack
+)
+from lib.utils.server_helpers import shape_hardware
 
 
 def can_hardware_handle_flavor(machine_name, flavor_name,
@@ -54,6 +60,124 @@ def can_hardware_handle_flavor(machine_name, flavor_name,
     success_msg = "machine: [{}] can run flavor [{}]".format(machine_name,
                                                              flavor_name)
     return (True, True, success_msg)
+
+
+def evacuate_rack(rack_name,
+                  admin_file=ADMIN_STATE_HARDWARE_FILE,
+                  hardware_file=HARDWARE_FILE,
+                  server_file=SERVER_FILE):
+    """
+    Removes a rack from the configuration and its associated machines and
+    virtual servers
+    """
+    # Load states
+    (r_success_hw_d, default_state) = load_state(hardware_file)
+    if not r_success_hw_d:
+        return (False, default_state)
+    (r_success_hw_a, current_state) = load_state(admin_file)
+    if not r_success_hw_a:
+        return (False, default_state)
+
+    default_racks = default_state['racks']
+    current_racks = current_state['racks']
+    default_machines = default_state['machines']
+    current_machines = current_state['machines']
+
+    # Verify the rack name exists in both states
+    if (rack_name not in default_racks and
+       rack_name not in current_racks):
+        return (False, 'Error: rack: [{}] '
+                'cannot be found.'.format(rack_name))
+    elif (rack_name not in default_racks or
+          rack_name not in current_racks):  # have a mismatch here
+        return (False, 'Error!!: States (admin vs hardware) are mismatched '
+                'for rack [{}]'.format(rack_name))
+
+    # Remove the machines that are on the rack
+    machine_names_a = [machine_name for machine_name in current_machines if
+                       current_machines[machine_name]['rack'] == rack_name]
+    machine_names_h = [machine_name for machine_name in default_machines if
+                       default_machines[machine_name]['rack'] == rack_name]
+    if set(machine_names_a) != set(machine_names_h):
+        return (False, 'Current state and default state (admin, hardware) '
+                       'are mismatched.  Aborting.')
+
+    messages = []
+    for machine_name in machine_names_a:
+        (remove_success, msg) = remove_machine(machine_name, admin_file,
+                                               hardware_file, server_file)
+        if not remove_success:
+            return (False, msg)
+        messages.append(msg)
+
+    # Remove the rack
+    current_racks.pop(rack_name, None)
+    default_racks.pop(rack_name, None)
+    # TODO: Check w_success
+
+    join_str = '\n----------\n'
+    success_msg = ('Sucessfully removed rack [{}].  Here are removed machines '
+                   'and their virtual servers.\n '
+                   '{}'.format(rack_name, messages.join(join_str)))
+    return (True, success_msg)
+
+
+def add_machine(machine_name,
+                mem,
+                disk,
+                vcpu,
+                ip,
+                rack,
+                admin_file=ADMIN_STATE_HARDWARE_FILE,
+                hardware_file=HARDWARE_FILE):
+    """
+    Adds a machine (unique name) to the configuration.
+    """
+    # Load states
+    (r_success_hw_d, default_state) = load_state(hardware_file)
+    if not r_success_hw_d:
+        return (False, default_state)
+    (r_success_hw_a, current_state) = load_state(admin_file)
+    if not r_success_hw_a:
+        return (False, default_state)  
+
+    default_machines = default_state['machines']
+    current_machines = current_state['machines']
+
+    # Check if the machine name is unique
+    if (machine_name in default_machines and
+       machine_name in current_machines):
+        return (False, 'Error: machine [{}] already exists.  '
+                       'Cannot add.'.format(machine_name))
+    if (machine_name in default_machines or
+       machine_name in current_machines):
+        return (False, 'Error!!: Mismatched stat for machine [{}].'
+                       ''.format(machine_name))
+
+    # Check the option (mem, disk, vcpu, ip, rack) inputs are good
+    if _check_num(mem) is False:
+        return (False, 'Error: machine [{}] has bad mem input [{}].'
+                       ''.format(machine_name, mem))
+    if _check_num(disk) is False:
+        return (False, 'Error: machine [{}] has bad disk input [{}].'
+                       ''.format(machine_name, disk))
+    if _check_num(vcpu) is False:
+        return (False, 'Error: machine [{}] has bad vcpu input [{}].'
+                       ''.format(machine_name, vcpu))
+    if _check_ip_addr(ip) is False:
+        return (False, 'Error: machine [{}] has bad ip input [{}].'
+                       ''.format(machine_name, ip))
+    racks = list(default_state['racks'])
+    if _check_rack(rack, racks) is False:
+        return (False, 'Error: machine [{}] has bad rack input [{}].'
+                       ''.format(machine_name, rack))
+
+    # Insert the machine into both states
+    machine = shape_hardware(machine_name, mem, disk, vcpu, ip, rack)
+    default_machines.update(machine)
+    current_machines.update(machine)
+
+    return (True, 'Added machine [{}].'.format(machine_name))
 
 
 def remove_machine(machine_name,
@@ -105,11 +229,14 @@ def remove_machine(machine_name,
     if default_machine is None or current_machine is None:
         return (False, 'ERROR!!: SHOULD NEVER BE HERE, SOME OTHER THREAD '
                        'REMOVED IT ALREADY')
-    
+
+    (w_success_d, err_msg_d) = write_state(default_machine)
+    (w_success_a, err_msg_a) = write_state(current_machine)
+    # TODO: Check for w_success
+
     msg = 'Successfully removed machine [{}]'.format(machine_name)
     if server_names:  # non empty list
-        msg += ('\nAlso removed virtuals servers [{}], which depend on the '
-                'machine'.format(server_names.join(' ,')))
-    
+        msg += ('\nAlso removed virtual servers (which depend on the machine) '
+                '[{}].'.format(server_names.join(' ,')))
+
     return (True, msg)
-    

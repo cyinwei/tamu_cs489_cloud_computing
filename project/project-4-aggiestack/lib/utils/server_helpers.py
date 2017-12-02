@@ -13,6 +13,11 @@ def shape_server(name, image, flavor, hardware):
     return {name: {'image': image, 'flavor': flavor, 'hardware': hardware}}
 
 
+def shape_hardware(name, mem, disk, vcpu, ip, rack):
+    return {name: {'mem': mem, 'disk': disk, 'vcpu': vcpu, 'ip': ip,
+                   'rack': rack}}
+
+
 def server_list_append(server, servers_p=SERVER_FILE):
     """
     Given a server (a dictionary), add it to the server list state (JSON file).

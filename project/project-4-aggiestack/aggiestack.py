@@ -325,7 +325,9 @@ def remove(ctx, machine):
 @click.option('--mem', default=None, required=True)
 @click.option('--disk', default=None, required=True)
 @click.option('--vcpus', default=None, required=True)
-def add(ctx, machine, mem, disk, vcpus):
+@click.option('--ip', default=None, required=True)
+@click.option('--rack', default=None, required=True)
+def add(ctx, machine, mem, disk, vcpus, ip, rack):
     """
     Add a machine to the configuration
     """
