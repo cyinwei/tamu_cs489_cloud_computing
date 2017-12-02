@@ -73,6 +73,7 @@ def config(ctx, hardware, images, flavors):
             if ad_s is False:
                 click.echo("Error: Couldn't create admin state... Reason:")
                 click.echo(ad_err_msg)
+            click.echo('Successfully configured hardware with [{}].'.format(hardware))
             _log(True, cli_input)
         else:
             click.echo("Error: couldn't import hardware settings.  Reasons:")
@@ -84,7 +85,7 @@ def config(ctx, hardware, images, flavors):
         path = Path(images)
         (success, err_msg) = import_image_config(path)
         if success is True:
-            # don't print anything, just log
+            click.echo('Successfully configured images with [{}].'.format(images))
             _log(True, cli_input)
         else:
             click.echo("Error: couldn't import images settings.  Reasons:")
@@ -96,7 +97,7 @@ def config(ctx, hardware, images, flavors):
         path = Path(flavors)
         (success, err_msg) = import_flavor_config(path)
         if success is True:
-            # don't print anything, just log
+            click.echo('Successfully configured flavors with [{}].'.format(flavors))
             _log(True, cli_input)
         else:
             click.echo("Error: couldn't import flavors settings.  Reasons:")

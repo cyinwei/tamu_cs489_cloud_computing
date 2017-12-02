@@ -88,6 +88,9 @@ def load_state(input_path):
     """
     Loads a JSON file from pathlib.Path (inpu_path) as a dict.
     """
+    if not input_path.exists():
+        return (True, None)  # assume no file exists means no data
+
     try:
         with input_path.open('r') as json_file:
             data = json.load(json_file)
