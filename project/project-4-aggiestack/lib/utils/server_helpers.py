@@ -4,9 +4,8 @@ servers.
 """
 
 
-from lib.settings import (ADMIN_STATE_HARDWARE_FILE, IMAGE_FILE, FLAVOR_FILE,
+from lib.settings import (ADMIN_STATE_HARDWARE_FILE, FLAVOR_FILE,
                           FLAVOR_KEYS, SERVER_FILE)
-from lib.admin import can_hardware_handle_flavor
 from lib.utils.io_helpers import load_state, write_state
 
 
