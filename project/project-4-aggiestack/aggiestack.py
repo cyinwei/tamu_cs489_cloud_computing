@@ -6,14 +6,16 @@ The CLI (command line interface) of aggiescript.  The 'main' function.
 from pathlib import Path
 import click
 
+from lib.utils.io_helpers import load_state
 from lib.config_io import (import_hardware_config, import_image_config,
                            import_flavor_config, create_admin_hardware_state)
-from lib.display import display
+from lib.display import display, display_state, get_table
 from lib.admin import can_hardware_handle_flavor
 from lib.server import create_server, delete_server
 from lib.settings import (LOGFILE, ADMIN_STATE_HARDWARE_FILE, HARDWARE_FILE,
-                          IMAGE_FILE, FLAVOR_FILE, HARDWARE_KEYS, IMAGE_KEYS,
-                          FLAVOR_KEYS, SERVER_FILE, SERVER_KEYS, INSTANCE_KEYS)
+                          IMAGE_FILE, FLAVOR_FILE, RACK_KEYS, HARDWARE_KEYS,
+                          IMAGE_KEYS, FLAVOR_KEYS, SERVER_FILE, SERVER_KEYS,
+                          INSTANCE_KEYS)
 
 
 def _log(success, command):
@@ -46,7 +48,21 @@ def config(ctx, hardware, images, flavors):
     """
     cli_input_base = "{} {} ".format(ctx.parent.info_name,
                                      ctx.info_name)
-    if hardware != '':
+    if ((hardware != '' and images != '') or (hardware != '' and flavors != '')
+       or (images != '' and flavors != '')):
+        cli_input = cli_input_base
+        if hardware != '':
+            cli_input += '--hardware {} '.format(hardware)
+        if images != '':
+            cli_input += '--images {} '.format(images)
+        if flavors != '':
+            cli_input += '--flavors {}'.format(flavors)
+
+        click.echo('Error: Can only accept ONE option [hardware, flavor, '
+                   'image] at a time.')
+        _log(False, cli_input)
+
+    elif hardware != '':
         cli_input = cli_input_base + "--hardware {}".format(hardware)
         path = Path(hardware)
         (success, err_msg) = import_hardware_config(path)
@@ -63,7 +79,7 @@ def config(ctx, hardware, images, flavors):
             click.echo(err_msg)
             _log(False, cli_input)
 
-    if images != '':
+    elif images != '':
         cli_input = cli_input_base + "--images {}".format(hardware)
         path = Path(images)
         (success, err_msg) = import_image_config(path)
@@ -75,7 +91,7 @@ def config(ctx, hardware, images, flavors):
             click.echo(err_msg)
             _log(False, cli_input)
 
-    if flavors != '':
+    elif flavors != '':
         cli_input = cli_input_base + "-- flavors{}".format(hardware)
         path = Path(flavors)
         (success, err_msg) = import_flavor_config(path)
@@ -112,13 +128,19 @@ def show_hardware(ctx):
                                          ctx.parent.info_name,
                                          ctx.info_name)
         table_info = 'Available current (admin) hardware configurations:'
-        (success, data) = display(ADMIN_STATE_HARDWARE_FILE, HARDWARE_KEYS)
+        (success, state) = load_state(ADMIN_STATE_HARDWARE_FILE)
+        if success is True:
+            data = 'Racks:\n' + get_table(state['racks'], RACK_KEYS)
+            data += ('\n\nServers:\n' + get_table(state['machines'], HARDWARE_KEYS))
     else:
         cli_input = "{} {} {}".format(ctx.parent.parent.info_name,
                                       ctx.parent.info_name,
                                       ctx.info_name)
         table_info = 'Available default hardware configurations:'
-        (success, data) = display(HARDWARE_FILE, HARDWARE_KEYS)
+        (success, state) = load_state(HARDWARE_FILE)
+        if success is True:
+            data = get_table(state['racks'], RACK_KEYS)
+            data += ('\n\n' + get_table(state['machines'], HARDWARE_KEYS))
     # display data and log
     if success is True:
         click.echo(table_info)
@@ -177,7 +199,12 @@ def show_all(ctx):
     """
     Displays all the available configurations.
     """
-    (hw_success, hw_data) = display(HARDWARE_FILE, HARDWARE_KEYS)
+    # hardware
+    hw_data = None
+    (hw_success, state) = load_state(HARDWARE_FILE)
+    if hw_success is True:
+        hw_data = get_table(state['racks'], RACK_KEYS)
+        hw_data += ('\n\n' + get_table(state['machines'], HARDWARE_KEYS))
     (im_success, im_data) = display(IMAGE_FILE, IMAGE_KEYS)
     (fl_success, fl_data) = display(FLAVOR_FILE, FLAVOR_KEYS)
 
@@ -187,9 +214,9 @@ def show_all(ctx):
         click.echo("Available configurations:\n")
         click.echo("Hardware:")
         click.echo(hw_data + '\n')
-        click.echo("Images")
+        click.echo("Images:")
         click.echo(im_data + '\n')
-        click.echo("Flavors")
+        click.echo("Flavors:")
         click.echo(fl_data)
 
     else:

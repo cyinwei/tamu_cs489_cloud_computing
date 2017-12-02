@@ -10,13 +10,17 @@ from lib.utils.check_config_inputs import (
     check_image_config_file,
     check_flavor_config_file
 ) 
-
-from tests import FIXTURES_DIR, read_file
+from tests import (read_file,
+                   HARDWARE_CONFIG_TXT,
+                   FLAVOR_CONFIG_TXT,
+                   IMAGE_CONFIG_TT,
+                   
+)
 
 
 # test hardware configs
 def test_correct_hardware_config():
-    filepath = FIXTURES_DIR / 'success' / 'hardware-config.txt'
+    filepath = HARDWARE_CONFIG_TXT
     lines = read_file(filepath)
     (check, err_msg) = check_hardware_config_file(lines)
     print(err_msg)
@@ -24,7 +28,7 @@ def test_correct_hardware_config():
 
 
 def test_default_hardware_config():
-    filepath = FIXTURES_DIR / 'default' / 'hardware-config.txt'
+    filepath = HARDWARE_CONFIG_TXT
     lines = read_file(filepath)
     (check, err_msg) = check_hardware_config_file(lines)
     print(err_msg)
@@ -32,7 +36,7 @@ def test_default_hardware_config():
 
 
 def test_ip_hardware_config():
-    filepath = FIXTURES_DIR / 'fail' / 'hardware' / 'bad-ip.txt'
+    filepath = HARDWARE_CONFIG_TXT
     lines = read_file(filepath)
     (check, err_msg) = check_hardware_config_file(lines)
     print(err_msg)
@@ -64,8 +68,8 @@ def test_vcpu_hardware_config():
 
 
 # test if we can check images correctly
-def test_default_image_config():
-    filepath = FIXTURES_DIR / 'default' / 'images-config.txt'
+def test_success_image_config():
+    filepath = IMAGE_CONFIG_TXT
     lines = read_file(filepath)
     (check, err_msg) = check_image_config_file(lines)
     print(err_msg)
@@ -73,8 +77,8 @@ def test_default_image_config():
 
 
 # test if we check flavors correctly
-def test_default_flavor_config():
-    filepath = FIXTURES_DIR / 'default' / 'flavor-config.txt'
+def test_success_flavor_config():
+    filepath = FLAVOR_CONFIG_TXT
     lines = read_file(filepath)
     (check, err_msg) = check_flavor_config_file(lines)
     print(err_msg)

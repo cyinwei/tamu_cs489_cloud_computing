@@ -36,8 +36,8 @@ def read_config_file(path, config_keys, check_fn):
     """
     lines = []
     try:
-        with path.open('r') as json_file:
-            lines = json_file.readlines()
+        with path.open('r') as config_file:
+            lines = config_file.readlines()
     except IOError as io_e:
         err_msg = "IOError: [{}], {}".format(io_e.errno, io_e.strerror)
         return (False, {}, err_msg)
@@ -91,8 +91,8 @@ def load_state(input_path):
     try:
         with input_path.open('r') as json_file:
             data = json.load(json_file)
-            return (True, data, 'success')
+            return (True, data)
     except IOError as io_e:
         err_msg = "In load_state(): IOError: [{}], {}".format(io_e.errno, io_e.strerror)
-        return (False, {}, err_msg)
+        return (False, err_msg)
         

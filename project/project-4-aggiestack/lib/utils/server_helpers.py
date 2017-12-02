@@ -20,7 +20,9 @@ def server_list_append(server, servers_p=SERVER_FILE):
     """
     data = None
     if servers_p.exists() is True:
-        (r_success, data, err_msg) = load_state(servers_p)
+        (r_success, data) = load_state(servers_p)
+        if r_success is False:
+            return (False, data)
     else:
         data = {}
 
@@ -46,16 +48,16 @@ def server_list_delete(server_name, servers_p=SERVER_FILE):
     if servers_p.exists() is False:
         return (False, 'Error: Virtual server state file: {} '
                 'does not exist.'.format(str(servers_p)))
-    (r_success, data, err_msg) = load_state(servers_p)
+    (r_success, data) = load_state(servers_p)
     if r_success is False:
-        return (False, 'Could not delete server.  Reason\n' + err_msg)
+        return (False, 'Could not delete server.  Reason\n' + data)
 
     data.pop(server_name, None)
     write_state(data, SERVER_FILE)
     return (True, 'Deleted {} from the server list.'.format(server_name))
 
 
-def _fcfs(flavor, hardware):
+def _fcfs(flavor, machines):
     """
     The brute force algorithm.  Finds the 'first' available physical server
     that can run the flavor.
@@ -64,15 +66,15 @@ def _fcfs(flavor, hardware):
     message.
     """
 
-    found_hardware = 0  # increment 1 for every 'match'
-    for name, settings in hardware.items():
+    found_machine = 0  # increment 1 for every 'match'
+    for name, settings in machines.items():
         for key in FLAVOR_KEYS:
             if settings[key] >= flavor[key]:
-                found_hardware += 1
-        if found_hardware == len(FLAVOR_KEYS):  # if all the keys are good
+                found_machine += 1
+        if found_machine == len(FLAVOR_KEYS):  # if all the keys are good
             return (True, name)
         else:
-            found_hardware = 0  # reset
+            found_machine = 0  # reset
 
     return (False, '')
 
@@ -87,16 +89,16 @@ def find_physical_server(flavor_name, algorithm=_fcfs,
     Returns (Success, Physical Server Name (or error message)).
     """
     # Load data
-    (query_hw, hardware, err_msg_hw) = load_state(hardware_state)
+    (query_hw, hardware) = load_state(hardware_state)
     if query_hw is False:
-        return (False, err_msg_hw)
-    (query_flavor, flavors, err_msg_flavors) = load_state(flavors)
+        return (False, hardware)
+    (query_flavor, flavors) = load_state(flavors)
     if query_flavor is False:
-        return (False, err_msg_flavors)
+        return (False, flavors)
     flavor_config = flavors[flavor_name]
 
     # Run the algorithm
-    (found, hw_name) = algorithm(flavor_config, hardware)
+    (found, hw_name) = algorithm(flavor_config, hardware['machines'])
 
     if found is False:
         return (False, ('Error: No suitable physical server '
@@ -116,11 +118,15 @@ def update_physical_server(flavor_name, phys_server_name,
 
     Returns if the attempt is successful or not. (True/False, Error Message)
     """
-    (r_success_flavor, flavors, err_msg_flavor) = load_state(flavor_state)
-    (r_success_hw, hardwares, err_msg_hw) = load_state(hardware_state)
-
+    (r_success_flavor, flavors) = load_state(flavor_state)
+    if r_success_flavor is False:
+        return (False, flavors)
+    (r_success_hw, hardwares) = load_state(hardware_state)
+    if r_success_hw is False:
+        return (False, hardwares)
+    
     flavor = flavors[flavor_name]
-    phys_server = hardwares[phys_server_name]
+    phys_server = hardwares['machines'][phys_server_name]
 
     # check if can 'subtract' and end up with nonnegative resources
     if subtract:
@@ -140,7 +146,7 @@ def update_physical_server(flavor_name, phys_server_name,
             phys_server[key] += flavor[key]
 
     phys_server_entry = {phys_server_name: phys_server}
-    hardwares.update(phys_server_entry)
+    hardwares['machines'].update(phys_server_entry)
     (w_success_hw, err_msg_write_hw) = write_state(hardwares,
                                                    ADMIN_STATE_HARDWARE_FILE)
     if w_success_hw is False:

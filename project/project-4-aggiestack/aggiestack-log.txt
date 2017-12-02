@@ -6,3 +6,61 @@ SUCCESS: aggiestack server delete slut
 SUCCESS: aggiestack server list
 SUCCESS: aggiestack server list
 SUCCESS: aggiestack server list
+FAILURE: aggiestack config --hardware tests/fixtures/success/config/hdwr-config.txt
+FAILURE: aggiestack config --hardware tests/fixtures/success/config/hdwr-config.txt
+SUCCESS: aggiestack config --hardware tests/fixtures/success/config/hdwr-config.txt
+SUCCESS: aggiestack config --hardware tests/fixtures/success/config/hdwr-config.txt
+SUCCESS: aggiestack config --hardware tests/fixtures/success/config/hdwr-config.txt
+SUCCESS: aggiestack admin show hardware
+SUCCESS: aggiestack config --hardware tests/fixtures/success/config/hdwr-config.txt
+SUCCESS: aggiestack config --hardware tests/fixtures/success/config/hdwr-config.txt
+SUCCESS: aggiestack admin show hardware
+FAILURE: aggiestack config --hardware tests/fixtures/success/config/image-config.txt
+FAILURE: aggiestack config --hardware tests/fixtures/success/config/image-config.txt
+FAILURE: aggiestack config --hardware tests/fixtures/success/config/image-config.txt
+FAILURE: aggiestack config --hardware tests/fixtures/success/config/image-config.txt
+FAILURE: aggiestack config --hardware tests/fixtures/success/config/image-config.txt
+FAILURE: aggiestack config --images 
+SUCCESS: aggiestack config --images 
+SUCCESS: aggiestack show images
+SUCCESS: aggiestack config -- flavors
+SUCCESS: aggiestack show flavors
+SUCCESS: aggiestack show all
+SUCCESS: aggiestack show all
+SUCCESS: aggiestack show all
+SUCCESS: aggiestack show all
+SUCCESS: aggiestack show all
+SUCCESS: aggiestack admin show hardware
+SUCCESS: aggiestack admin show instances
+SUCCESS: aggiestack server list
+SUCCESS: aggiestack server create --image linux-ubuntu --flavor xlarge bae
+SUCCESS: aggiestack server list
+SUCCESS: aggiestack admin show hardware
+SUCCESS: aggiestack server list
+SUCCESS: aggiestack server list
+SUCCESS: aggiestack config --hardware tests/fixtures/success/config/hdwr-config.txt
+SUCCESS: aggiestack show all
+SUCCESS: aggiestack server create --image linux-ubuntu --flavor xlarge bae
+SUCCESS: aggiestack server list
+SUCCESS: aggiestack admin show instances
+SUCCESS: aggiestack server delete bae
+FAILURE: aggiestack admin can_host x1 large
+FAILURE: aggiestack admin can_host x1 large
+SUCCESS: aggiestack show flavors
+SUCCESS: aggiestack show hardware
+SUCCESS: aggiestack admin can_host k1 large
+SUCCESS: aggiestack admin can_host k1 xlarge
+SUCCESS: aggiestack server list
+SUCCESS: aggiestack server create --image linux-ubuntu --flavor xlarge bae
+SUCCESS: aggiestack server list
+SUCCESS: aggiestack admin show instances
+SUCCESS: aggiestack admin can_host k1 xlarge
+SUCCESS: aggiestack admin can_host k1 xlarge
+SUCCESS: aggiestack admin show instances
+SUCCESS: aggiestack server delete bae
+SUCCESS: aggiestack server list
+FAILURE: aggiestack server delete bae
+FAILURE: aggiestack server delete bae
+FAILURE: aggiestack server delete bae
+SUCCESS: aggiestack config --hardware tests/fixtures/success/config/hdwr-config.txt
+FAILURE: aggiestack config --hardware tests/fixtures/success/config/hdwr-config.txt --flavors tests/fixtures/success/config/hdwr-config.txt

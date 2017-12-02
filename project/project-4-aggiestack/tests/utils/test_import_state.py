@@ -23,8 +23,8 @@ def test_import_hardware():
     assert i_success is True
 
     # load the test state file
-    (l_success, data, l_err_msg) = load_state(TEST_JSON)
-    print(('load err_msg: ', l_err_msg))
+    (l_success, data) = load_state(TEST_JSON)
+    print(('load err_msg: ', data))
     assert l_success is True
 
     # parse the input file again and check the data is the same
@@ -47,8 +47,8 @@ def test_import_image():
     assert i_success is True
 
     # load the test state file
-    (l_success, data, l_err_msg) = load_state(TEST_JSON)
-    print(('load err_msg: ', l_err_msg))
+    (l_success, data) = load_state(TEST_JSON)
+    print(('load err_msg: ', data))
     assert l_success is True
 
     # parse the input file again and check the data is the same
@@ -71,8 +71,8 @@ def test_import_flavor():
     assert i_success is True
 
     # load the test state file
-    (l_success, data, l_err_msg) = load_state(TEST_JSON)
-    print(('load err_msg: ', l_err_msg))
+    (l_success, data) = load_state(TEST_JSON)
+    print(('load err_msg: ', data))
     assert l_success is True
 
     # parse the input file again and check the data is the same

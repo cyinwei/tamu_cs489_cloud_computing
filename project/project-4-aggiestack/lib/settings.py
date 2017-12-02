@@ -6,8 +6,9 @@ configuration.
 from pathlib import Path
 
 # keys for the dicts/JSON state objects
-HARDWARE_KEYS = ('ip', 'mem', 'disk', 'vcpu')
-IMAGE_KEYS = ('path', )  # need the , to be a tuple
+RACK_KEYS = ('cache size', )  # need the , to be a tuple
+HARDWARE_KEYS = ('rack', 'ip', 'mem', 'disk', 'vcpu')
+IMAGE_KEYS = ('size', 'path')  
 FLAVOR_KEYS = ('mem', 'disk', 'vcpu')
 SERVER_KEYS = ('image', 'flavor')
 INSTANCE_KEYS = ('hardware', )

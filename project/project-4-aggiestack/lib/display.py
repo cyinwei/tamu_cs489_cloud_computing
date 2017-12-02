@@ -91,10 +91,14 @@ def get_table(data, keys, translations=None):
 
 
 def display(state_path, keys):
-    (success, data, err_msg) = load_state(state_path)
+    (success, data) = load_state(state_path)
 
     if success is False:
-        return (False, err_msg)
+        return (False, data)
 
     else:
         return (True, get_table(data, keys))
+
+
+def display_state(data, keys):
+    return (True, get_table(data, keys))

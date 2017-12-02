@@ -45,13 +45,13 @@ def delete_server(name, server_list_file=SERVER_FILE,
     """
     Deletes a virtual server by its instance name.
     """
-    (sv_read_success, sv_data, err_msg_read) = load_state(server_list_file)
+    (sv_read_success, sv_data) = load_state(server_list_file)
     if sv_read_success is False:
-        return (False, err_msg_read)
+        return (False, sv_data)
 
     # check if the name exists
     if sv_data.get(name) is None:
-        return (False, 'Error: Server [{}] does not exist.'.format(name))
+        return (False, 'Error: Virtual server [{}] does not exist.'.format(name))
 
     # grab flavor and hardware data from the server list
     flavor = sv_data[name]['flavor']

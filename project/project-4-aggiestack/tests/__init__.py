@@ -4,10 +4,23 @@ Our testing module for Aggiestack (project 0).
 from pathlib import Path
 
 FIXTURES_DIR = Path(__file__).parent / 'fixtures'
-FLAVOR_JSON = FIXTURES_DIR / 'success' / 'flavor-config.json'
-ADMIN_JSON = FIXTURES_DIR / 'success' / 'hardware.json'
-FLAVOR_TXT = FIXTURES_DIR / 'success' / 'flavor-config.txt'
-TEST_JSON = Path(__file__).parent / 'test.json'
+HARDWARE_CONFIG_TXT = (FIXTURES_DIR / 'success' / 'config' / 
+                       'hdwr-config.txt')
+FLAVOR_CONFIG_TXT = (FIXTURES_DIR / 'success' / 'config' / 
+                     'flavor-config.txt')
+IMAGE_CONFIG_TXT = (FIXTURES_DIR / 'success' / 'config' / 
+                    'image-config.txt')
+
+BAD_MEM_HARDWARE_TXT = (FIXTURES_DIR / 'fail' / 'config' / 'hardware' /
+                        'bad-mem.txt')
+BAD_IP_HARDWARE_TXT = (FIXTURES_DIR / 'fail' / 'config' / 'hardware' /
+                       'bad-ip.txt')
+BAD_DISK_HARDWARE_TXT = (FIXTURES_DIR / 'fail' / 'config' / 'hardware' /
+                         'bad-disk.txt')
+BAD_VCPU_HARDWARE_TXT = (FIXTURES_DIR / 'fail' / 'config' / 'hardware' /
+                         'bad-vcpu.txt')
+
+TEST_JSON = Path(__file__).parent / 'fixtures' / 'state' / 'test.json'
 
 
 def read_file(path):
