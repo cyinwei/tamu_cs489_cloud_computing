@@ -301,6 +301,36 @@ def can_host(ctx, names):
     _log(success, cli_input)
 
 
+@click.command()
+@click.argument('rack_name')
+@click.pass_context
+def evacuate(ctx, rack_name):
+    """
+    Removes a rack from the configuration and all it's associated machines.
+    """
+    pass
+
+
+@click.command()
+@click.argument('machine')
+@click.pass_context
+def remove(ctx, machine):
+    """
+    Removes a machine from the configuration.
+    """
+    pass
+
+@click.command()
+@click.argument('machine')
+@click.option('--mem', default=None, required=True)
+@click.option('--disk', default=None, required=True)
+@click.option('--vcpus', default=None, required=True)
+def add(ctx, machine, mem, disk, vcpus):
+    """
+    Add a machine to the configuration
+    """
+    pass
+
 @click.group('server')
 def server():
     """
