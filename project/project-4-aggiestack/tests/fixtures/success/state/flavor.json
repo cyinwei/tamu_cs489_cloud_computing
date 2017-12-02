@@ -1,0 +1,1 @@
+{"small": {"mem": 1, "disk": 1, "vcpu": 1}, "medium": {"mem": 8, "disk": 2, "vcpu": 4}, "large": {"mem": 16, "disk": 2, "vcpu": 4}, "xlarge": {"mem": 32, "disk": 4, "vcpu": 8}}

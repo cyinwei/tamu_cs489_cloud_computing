@@ -41,8 +41,18 @@ BAD_RACK_HARDWARE_TXT_M = (FIXTURES_DIR / 'fail' / 'config' / 'hardware' /
 BAD_RACK_HARDWARE_TXT_M2 = (FIXTURES_DIR / 'fail' / 'config' / 'hardware' /
                             'bad_rack_machine2.txt')
 
+ADMIN_JSON = (FIXTURES_DIR / 'success' / 'state' / 'hardware_state.json')
+FLAVOR_JSON = (FIXTURES_DIR / 'success' / 'state' / 'flavor.json')
 
 TEST_JSON = Path(__file__).parent / 'fixtures' / 'state' / 'test.json'
+
+IMAGES_DICT = {"linux-ubuntu":
+               {"size": 128, "path": "/images/linux-ubuntu-v1.0.img"},
+               "linux-sles": {"size": 512, "path": "/images/old-image.img"},
+               "linux-ubuntu-16":
+               {"size": 2048, "path": "/images/linux-ubuntu-16.img"}}
+
+
 
 
 def read_file(path):

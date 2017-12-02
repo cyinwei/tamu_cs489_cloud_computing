@@ -5,14 +5,14 @@ from lib.utils.io_helpers import load_state, write_state
 from lib.display import get_table
 from lib.settings import FLAVOR_KEYS
 from tests import FLAVOR_JSON, TEST_JSON
-from tests.fixtures.fixtures import IMAGES_DICT
+from tests import IMAGES_DICT
 
 def test_load_state(path=FLAVOR_JSON):
     """
     Tests if the file we just loaded is a dict and has the correct data.
     """
-    (success, data, err_msg) = load_state(path)
-    print(err_msg)
+    (success, data) = load_state(path)
+    print(data)
 
     print(get_table(data, FLAVOR_KEYS))
     assert success is True
@@ -30,8 +30,8 @@ def test_write_state(data=None, testpath=TEST_JSON):
     print(w_err_msg)
     assert w_success is True
 
-    (r_success, r_data, r_err_msg) = load_state(testpath)
-    print(r_err_msg)
+    (r_success, r_data) = load_state(testpath)
+    print(r_data)
     assert r_success is True
 
     assert data == r_data

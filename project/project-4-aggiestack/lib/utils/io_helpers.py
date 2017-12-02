@@ -42,17 +42,17 @@ def read_config_file(path, config_keys, check_fn):
             lines = config_file.readlines()
     except IOError as io_e:
         err_msg = "IOError: [{}], {}".format(io_e.errno, io_e.strerror)
-        return (False, {}, err_msg)
+        return (False, err_msg)
 
     # check if the file format is good
     (success, check_error_msg) = check_fn(lines)
     if not success:
-        err_msg = "Error: In file [{}]: ".format(path) + '\n'+ check_error_msg
-        return (False, {}, err_msg)
+        err_msg = "Error: In file [{}]: ".format(path) + '\n' + check_error_msg
+        return (False, err_msg)
 
     # read the file
     config = {}
-    for line in lines[1:]: # 1st line is the number of configs
+    for line in lines[1:]:  # 1st line is the number of configs
         (name, line_config) = parse_config_line(line, config_keys)
         config[name] = line_config
 
