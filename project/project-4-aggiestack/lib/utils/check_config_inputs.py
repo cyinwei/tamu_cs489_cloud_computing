@@ -41,7 +41,6 @@ def _check_rack(rack_name, RACK_TYPES=None):
         return True
     return False
 
-
 # Helper functions to check for certain terms
 class TermType(Enum):
     """ Number of term Python object types (the configuration values). """
@@ -58,8 +57,9 @@ def _generate_rack_types(lines):
     NOTE: No error checking.  Use _check_file_structure() to do checking.
     """
     rack_types = []
-    for name in lines[1:]:
-        rack_types.append(name.strip())
+    for line in lines[1:]:
+        name = line.split()[0]
+        rack_types.append(name)
     return rack_types
 
 
@@ -130,6 +130,7 @@ def _check_term_types(line, term_schema, RACK_TYPES=None):
             if _check_rack(term, RACK_TYPES) is False:
                 error_message = ("Invalid Rack name: [{}].  Imported Rack "
                                  "names are [{}].\n".format(term, RACK_TYPES))
+                return (False, error_message)
 
     return (True, 'No errors in the single configuration.')
 
@@ -180,7 +181,8 @@ def check_hardware_config_file(file_lines):
                            TermType.NUM,      # Number of virtual disks
                            TermType.NUM]      # Number of virtual cores (VCPUs)
     for line, machine in enumerate(machines):  # line is line number - 2
-        (is_term, err_msg) = _check_term_types(machine, hardware_term_types)
+        (is_term, err_msg) = _check_term_types(machine, hardware_term_types,
+                                               _generate_rack_types(rack_lines))
         if is_term is False:
             error_message = ("Syntax Error: In line {}:\n".format(line + 2) +
                              err_msg)

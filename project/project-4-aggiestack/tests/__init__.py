@@ -11,14 +11,36 @@ FLAVOR_CONFIG_TXT = (FIXTURES_DIR / 'success' / 'config' /
 IMAGE_CONFIG_TXT = (FIXTURES_DIR / 'success' / 'config' / 
                     'image-config.txt')
 
-BAD_MEM_HARDWARE_TXT = (FIXTURES_DIR / 'fail' / 'config' / 'hardware' /
-                        'bad-mem.txt')
-BAD_IP_HARDWARE_TXT = (FIXTURES_DIR / 'fail' / 'config' / 'hardware' /
-                       'bad-ip.txt')
-BAD_DISK_HARDWARE_TXT = (FIXTURES_DIR / 'fail' / 'config' / 'hardware' /
-                         'bad-disk.txt')
-BAD_VCPU_HARDWARE_TXT = (FIXTURES_DIR / 'fail' / 'config' / 'hardware' /
-                         'bad-vcpu.txt')
+# Bad files with errors in them
+BAD_MEM_HARDWARE_TXT_NAN = (FIXTURES_DIR / 'fail' / 'config' / 'hardware' /
+                            'bad_mem_nan.txt')
+BAD_MEM_HARDWARE_TXT_NEG = (FIXTURES_DIR / 'fail' / 'config' / 'hardware' /
+                            'bad_mem_neg.txt') 
+BAD_IP_HARDWARE_TXT_LOGIC = (FIXTURES_DIR / 'fail' / 'config' / 'hardware' /
+                             'bad_ip.txt')
+BAD_IP_HARDWARE_TXT_DECIMALS = (FIXTURES_DIR / 'fail' / 'config' / 'hardware' /
+                                'bad_ip_decimals.txt')
+BAD_IP_HARDWARE_TXT_NUM = (FIXTURES_DIR / 'fail' / 'config' / 'hardware' /
+                           'bad_ip_num.txt')
+BAD_IP_HARDWARE_TXT_STR = (FIXTURES_DIR / 'fail' / 'config' / 'hardware' /
+                           'bad_ip_str.txt')
+BAD_DISK_HARDWARE_TXT_NAN = (FIXTURES_DIR / 'fail' / 'config' / 'hardware' /
+                             'bad_disk_nan.txt')
+BAD_DISK_HARDWARE_TXT_NEG = (FIXTURES_DIR / 'fail' / 'config' / 'hardware' /
+                             'bad_disk_neg.txt')
+BAD_VCPU_HARDWARE_TXT_NAN = (FIXTURES_DIR / 'fail' / 'config' / 'hardware' /
+                             'bad_vcpu_nan.txt')
+BAD_VCPU_HARDWARE_TXT_NEG = (FIXTURES_DIR / 'fail' / 'config' / 'hardware' /
+                             'bad_vcpu_neg.txt')
+BAD_RACK_HARDWARE_TXT_NAN = (FIXTURES_DIR / 'fail' / 'config' / 'hardware' /
+                             'bad_rack_nan.txt')
+BAD_RACK_HARDWARE_TXT_NEG = (FIXTURES_DIR / 'fail' / 'config' / 'hardware' /
+                             'bad_rack_neg.txt')
+BAD_RACK_HARDWARE_TXT_M = (FIXTURES_DIR / 'fail' / 'config' / 'hardware' /
+                           'bad_rack_machine.txt')
+BAD_RACK_HARDWARE_TXT_M2 = (FIXTURES_DIR / 'fail' / 'config' / 'hardware' /
+                            'bad_rack_machine2.txt')
+
 
 TEST_JSON = Path(__file__).parent / 'fixtures' / 'state' / 'test.json'
 

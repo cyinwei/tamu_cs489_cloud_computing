@@ -191,3 +191,19 @@ SUCCESS: aggiestack admin show hardware
 SUCCESS: aggiestack server delete my-first-instance
 SUCCESS: aggiestack admin show instances
 SUCCESS: aggiestack admin show hardware
+SUCCESS: aggiestack config --hardware hdwr-config.txt
+SUCCESS: aggiestack show hardware
+SUCCESS: aggiestack config --images 
+SUCCESS: aggiestack show images
+SUCCESS: aggiestack config -- flavors
+SUCCESS: aggiestack show flavors
+SUCCESS: aggiestack admin show instances
+SUCCESS: aggiestack server create --image linux-ubuntu --flavor small my-first-instance
+SUCCESS: aggiestack server create --image linux-ubuntu --flavor medium my-second-instance
+SUCCESS: aggiestack admin show instances
+SUCCESS: aggiestack server list
+SUCCESS: aggiestack admin show hardware
+SUCCESS: aggiestack server delete my-first-instance
+SUCCESS: aggiestack admin show instances
+SUCCESS: aggiestack admin show hardware
+SUCCESS: aggiestack server list
