@@ -1,9 +1,10 @@
 """
-Test the admin logic.
+Test the admin can_host() logic.
 """
 
 from lib.admin import can_hardware_handle_flavor
 from tests import ADMIN_JSON, FLAVOR_JSON
+
 
 def test_admin_yes_handle():
     """
@@ -20,6 +21,7 @@ def test_admin_yes_handle():
     assert success is True
     assert can_handle is True
 
+
 def test_admin_no_handle():
     """
     Tests the admin logic, machine name can't handle flavor.
@@ -35,6 +37,7 @@ def test_admin_no_handle():
     assert success is True
     assert can_handle is False
 
+
 def test_admin_bad_machine_name():
     """
     Tests the admin logic, machine name doesn't exist.
@@ -48,6 +51,7 @@ def test_admin_bad_machine_name():
     print(msg)
     assert success is False
     assert can_handle is False
+
 
 def test_admin_bad_flavor_name():
     """

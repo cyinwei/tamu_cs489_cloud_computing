@@ -7,7 +7,7 @@ from lib.utils.server_helpers import (find_physical_server,
                                       server_list_append,
                                       server_list_delete,
                                       shape_server)
-from lib.utils.io_helpers import load_state
+from lib.utils.io_helpers import load_state, write_state
 from lib.settings import ADMIN_STATE_HARDWARE_FILE, SERVER_FILE
 
 
@@ -65,4 +65,11 @@ def delete_server(name, server_list_file=SERVER_FILE,
     if sv_success is False:
         return (False, err_msg_sv)
 
-    return (True, 'Removed server [{}].'.format(name))
+    return (True, 'Removed virtual server [{}].'.format(name))
+
+
+def reset_server_list(server_file=SERVER_FILE):
+    """
+    Cleans out the server list by resetting the state (JSON file).
+    """
+    return write_state({}, server_file)

@@ -1,0 +1,14 @@
+#+TITLE: GFS and MapReduce (HDFS, Hadoop)
+** GFS
+*** Big Data [input, problem]
+**** Web scale data
+***** How much data does Google collect?  Or Facebook?
+      In 2009, Google collects 24PB of data per day.
+*** Shapes
+**** You need a distributed system, and all the problems that come with it
+***** Fault tolerance !!!  Be okay with nodes dying
+**** Locality is efficiency.
+**** Write throughput and block reads >> any other file operation
+     Write once, read once.  Boils down to append (e.g. logfiles) and chunked reads.  We don't need to edit files, for example, at least not the original.
+*** Architecture
+    

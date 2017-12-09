@@ -42,7 +42,11 @@ BAD_RACK_HARDWARE_TXT_M2 = (FIXTURES_DIR / 'fail' / 'config' / 'hardware' /
                             'bad_rack_machine2.txt')
 
 ADMIN_JSON = (FIXTURES_DIR / 'success' / 'state' / 'hardware_state.json')
+HARDWARE_JSON = (FIXTURES_DIR / 'success' / 'state' / 'hardware.json')
 FLAVOR_JSON = (FIXTURES_DIR / 'success' / 'state' / 'flavor.json')
+IMAGE_JSON = (FIXTURES_DIR / 'success' / 'state' / 'image.json')
+SERVER_JSON = (FIXTURES_DIR / 'success' / 'state' / 'server_list.json')
+
 
 TEST_JSON = Path(__file__).parent / 'fixtures' / 'state' / 'test.json'
 

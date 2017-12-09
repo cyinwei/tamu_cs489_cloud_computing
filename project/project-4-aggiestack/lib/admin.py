@@ -102,6 +102,14 @@ def evacuate_rack(rack_name,
         return (False, 'Current state and default state (admin, hardware) '
                        'are mismatched.  Aborting.')
 
+    # Remove the rack
+    current_racks.pop(rack_name, None)
+    default_racks.pop(rack_name, None)
+    # TODO: Check w_success
+
+    (w_success_a, msg_a) = write_state(current_state, admin_file)
+    (w_success_d, msg_d) = write_state(default_state, hardware_file)
+
     messages = []
     for machine_name in machine_names_a:
         (remove_success, msg) = remove_machine(machine_name, admin_file,
@@ -110,15 +118,10 @@ def evacuate_rack(rack_name,
             return (False, msg)
         messages.append(msg)
 
-    # Remove the rack
-    current_racks.pop(rack_name, None)
-    default_racks.pop(rack_name, None)
-    # TODO: Check w_success
-
     join_str = '\n----------\n'
     success_msg = ('Sucessfully removed rack [{}].  Here are removed machines '
-                   'and their virtual servers.\n '
-                   '{}'.format(rack_name, messages.join(join_str)))
+                   'and their virtual servers.\n'
+                   '{}'.format(rack_name, join_str.join(messages)))
     return (True, success_msg)
 
 
@@ -177,6 +180,9 @@ def add_machine(machine_name,
     default_machines.update(machine)
     current_machines.update(machine)
 
+    (w_success_d, err_msg_d) = write_state(default_state, hardware_file)
+    (w_success_a, err_msg_a) = write_state(current_state, admin_file) 
+
     return (True, 'Added machine [{}].'.format(machine_name))
 
 
@@ -230,13 +236,13 @@ def remove_machine(machine_name,
         return (False, 'ERROR!!: SHOULD NEVER BE HERE, SOME OTHER THREAD '
                        'REMOVED IT ALREADY')
 
-    (w_success_d, err_msg_d) = write_state(default_machine)
-    (w_success_a, err_msg_a) = write_state(current_machine)
+    (w_success_d, err_msg_d) = write_state(default_state, hardware_file)
+    (w_success_a, err_msg_a) = write_state(current_state, admin_file)
     # TODO: Check for w_success
 
     msg = 'Successfully removed machine [{}]'.format(machine_name)
     if server_names:  # non empty list
         msg += ('\nAlso removed virtual servers (which depend on the machine) '
-                '[{}].'.format(server_names.join(' ,')))
+                '[{}].'.format(', '.join(server_names)))
 
     return (True, msg)

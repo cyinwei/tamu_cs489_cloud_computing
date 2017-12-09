@@ -9,9 +9,14 @@ import click
 from lib.utils.io_helpers import load_state
 from lib.config_io import (import_hardware_config, import_image_config,
                            import_flavor_config, create_admin_hardware_state)
-from lib.display import display, display_state, get_table
-from lib.admin import can_hardware_handle_flavor
-from lib.server import create_server, delete_server
+from lib.display import display, get_table
+from lib.admin import (
+    can_hardware_handle_flavor,
+    evacuate_rack,
+    add_machine,
+    remove_machine
+)
+from lib.server import create_server, delete_server, reset_server_list
 from lib.settings import (LOGFILE, ADMIN_STATE_HARDWARE_FILE, HARDWARE_FILE,
                           IMAGE_FILE, FLAVOR_FILE, RACK_KEYS, HARDWARE_KEYS,
                           IMAGE_KEYS, FLAVOR_KEYS, SERVER_FILE, SERVER_KEYS,
@@ -73,6 +78,11 @@ def config(ctx, hardware, images, flavors):
             if ad_s is False:
                 click.echo("Error: Couldn't create admin state... Reason:")
                 click.echo(ad_err_msg)
+            (sv_s, sv_err_msg) = reset_server_list()
+            if sv_s is False:
+                click.echo("Error: Couldn't create admin state... Reason:")
+                click.echo(sv_err_msg)
+            click.echo('Reset server list after configuration.')
             click.echo('Successfully configured hardware with [{}].'.format(hardware))
             _log(True, cli_input)
         else:
@@ -85,6 +95,11 @@ def config(ctx, hardware, images, flavors):
         path = Path(images)
         (success, err_msg) = import_image_config(path)
         if success is True:
+            (sv_s, sv_err_msg) = reset_server_list()
+            if sv_s is False:
+                click.echo("Error: Couldn't create admin state... Reason:")
+                click.echo(sv_err_msg)
+            click.echo('Reset server list after configuration.')
             click.echo('Successfully configured images with [{}].'.format(images))
             _log(True, cli_input)
         else:
@@ -97,6 +112,11 @@ def config(ctx, hardware, images, flavors):
         path = Path(flavors)
         (success, err_msg) = import_flavor_config(path)
         if success is True:
+            (sv_s, sv_err_msg) = reset_server_list()
+            if sv_s is False:
+                click.echo("Error: Couldn't create admin state... Reason:")
+                click.echo(sv_err_msg)
+            click.echo('Reset server list after configuration.')
             click.echo('Successfully configured flavors with [{}].'.format(flavors))
             _log(True, cli_input)
         else:
@@ -132,7 +152,7 @@ def show_hardware(ctx):
         (success, state) = load_state(ADMIN_STATE_HARDWARE_FILE)
         if success is True:
             data = 'Racks:\n' + get_table(state['racks'], RACK_KEYS)
-            data += ('\n\nServers:\n' + get_table(state['machines'], HARDWARE_KEYS))
+            data += ('\n\nMachines:\n' + get_table(state['machines'], HARDWARE_KEYS))
     else:
         cli_input = "{} {} {}".format(ctx.parent.parent.info_name,
                                       ctx.parent.info_name,
@@ -140,8 +160,8 @@ def show_hardware(ctx):
         table_info = 'Available default hardware configurations:'
         (success, state) = load_state(HARDWARE_FILE)
         if success is True:
-            data = get_table(state['racks'], RACK_KEYS)
-            data += ('\n\n' + get_table(state['machines'], HARDWARE_KEYS))
+            data = 'Racks:\n' + get_table(state['racks'], RACK_KEYS)
+            data += ('\n\nMachines:\n' + get_table(state['machines'], HARDWARE_KEYS))
     # display data and log
     if success is True:
         click.echo(table_info)
@@ -308,7 +328,15 @@ def evacuate(ctx, rack_name):
     """
     Removes a rack from the configuration and all it's associated machines.
     """
-    pass
+    (success, msg) = evacuate_rack(rack_name)
+    click.echo(msg)
+    cli_input = "{} {} {} {}".format(
+        ctx.parent.parent.info_name,
+        ctx.parent.info_name,
+        ctx.info_name,
+        rack_name
+    )
+    _log(success, cli_input)
 
 
 @click.command()
@@ -318,20 +346,40 @@ def remove(ctx, machine):
     """
     Removes a machine from the configuration.
     """
-    pass
+    (success, msg) = remove_machine(machine)
+    click.echo(msg)
+    cli_input = "{} {} {} {}".format(
+        ctx.parent.parent.info_name,
+        ctx.parent.info_name,
+        ctx.info_name,
+        machine
+    )
+    _log(success, cli_input)
+
 
 @click.command()
+@click.pass_context
 @click.argument('machine')
-@click.option('--mem', default=None, required=True)
-@click.option('--disk', default=None, required=True)
-@click.option('--vcpus', default=None, required=True)
-@click.option('--ip', default=None, required=True)
-@click.option('--rack', default=None, required=True)
+@click.option('-mem', required=True)
+@click.option('-disk', required=True)
+@click.option('-vcpus', required=True)
+@click.option('-ip', required=True)
+@click.option('-rack', required=True)
 def add(ctx, machine, mem, disk, vcpus, ip, rack):
     """
     Add a machine to the configuration
     """
-    pass
+    (success, msg) = add_machine(machine, mem, disk, vcpus, ip, rack)
+    click.echo(msg)
+    cli_input = "{} {} {} ".format(ctx.parent.parent.info_name,
+                                   ctx.parent.info_name,
+                                   ctx.info_name)
+    cli_input += (
+        '-mem {} -disk {} -vcpus {} -ip {} -rack {} {}'.format(
+            mem, disk, vcpus, ip, rack, machine)
+        )
+    _log(success, cli_input)
+
 
 @click.group('server')
 def server():
@@ -417,6 +465,9 @@ admin_show.add_command(show_instances)
 
 admin.add_command(admin_show)
 admin.add_command(can_host)
+admin.add_command(evacuate)
+admin.add_command(add)
+admin.add_command(remove)
 
 show.add_command(show_hardware)
 show.add_command(show_images)

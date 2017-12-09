@@ -1,0 +1,1 @@
+{"linux-ubuntu": {"size": 128, "path": "/images/linux-ubuntu-v1.0.img"}, "linux-sles": {"size": 512, "path": "/images/old-image.img"}, "linux-ubuntu-16": {"size": 2048, "path": "/images/linux-ubuntu-16.img"}}
