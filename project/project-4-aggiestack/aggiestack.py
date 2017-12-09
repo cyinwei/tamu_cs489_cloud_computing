@@ -75,6 +75,7 @@ def config(ctx, hardware, images, flavors):
             # don't print anything, just log
             (ad_s, ad_err_msg) = create_admin_hardware_state(HARDWARE_FILE,
                                                              ADMIN_STATE_HARDWARE_FILE)
+            SERVER_FILE.unlink()  # new hardware, reset the server list
             if ad_s is False:
                 click.echo("Error: Couldn't create admin state... Reason:")
                 click.echo(ad_err_msg)
