@@ -1,0 +1,33 @@
+#+TITLE: aggiestack: Part C
+
+* Time Spent
+  I spent about 2 hours.
+* Design
+  Since we're using the rack local caches now, we need to modify our design.  Specifically, anytime we instantiate a virtual server, we need to use the rack's copy of the image.  That means we need to control the state of the images for each rack.  So we'll have a 'images' configuration for each rack.
+
+  I still believe in a single master node which will keep track of the global state, so file I/O race conditions shouln't be a problem.  To be safer though (atomic), storing the state in a SQL server (Postgres? SQLite?) would be better.
+
+*** API Design
+    Here are the 
+**** =aggiestack config --hardware hdwr-config.txt=
+     No change would be needed besides the migration to a better persistant store (files to RDB).  That'll take maybe 30 minutes to install the SQL wrapper library and change the =write_state= and =load_state= functions.
+**** =aggiestack config --images image-config.txt=
+     Again, no changes.  Since the three configurations have the same underlying code base, this should take 10 minutes.
+**** =aggiestack config --flavors flavor-config.txt=
+     Again, no changes.  10 minutes.
+**** =aggiestack show hardware=
+     No changes at all.  Once the =load_state= function is updated to use a RDB, the print functions will stay the same.
+**** =aggiestack show images=
+     First big change.  We do a for loop, iterating through the table of every rack to see what images are currently loaded onto it.  Then we can use the =display= function to print a nice table out.  60 minutes.
+**** =aggiestack server create --image IMAGE --flavor FLAVOR_NAME INSTANCE_NAME=
+     In the check, we need to make sure the local rack has the instance name within our first come first serve (FCFS) algorithm.  What we can do is just run FCFS on each local rack, maybe picking the least populated rack.  We don't try and fix (or load) the image into the local rack; we let the admin do the work for us.
+**** =aggiestack server delete INSTANCE_NAME=
+     No change, since the underlying code base (=write_state=) will be already changed.  0 minutes.
+**** =aggiestack server list=
+     No change, for the same reasons.  0 minutes.
+**** =aggiestack admin show imagecaches RACK_NAME=
+     Brand new.  We need to write the CLI function, which will take 10 minutes.  Then we need to do some rack name validation, which is similar to the underlying RACK type, which till take 10 minutes.  Then we just print the data out.  Overall, it should take 30 minutes.
+**** =aggiestack admin show hardware=
+     Same as before, 0 minutes.
+**** =aggiestack admin show instances=
+     Same as before, 0 minutes.

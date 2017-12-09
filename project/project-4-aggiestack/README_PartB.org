@@ -1,4 +1,4 @@
-#+TITLE: aggiestack: Part A
+#+TITLE: aggiestack: Part B
 
 * Time Spent
   I spent about 10 hours, split between debugging and implementing features.
