@@ -1,0 +1,96 @@
+#+TITLE: aggiestack: Part A
+
+* Time Spent
+  I spent about 10 hours, split between debugging and implementing features.
+* Github
+  The github commit with the code for part B can be found ... [will edit afterwards]
+* Design
+  Very pure and data centric.  I try and keep the state (data) and functions separate.  I do keep the data in files (as JSON objects), which makes this design terrible in any distributed system (multiple writes at once).  The next step would be using an database (ACID, SQL) to hold the state.  Keeping the states in one file made a little tougher to change the design of the state, since that meant I had to change a bunch of shared functions.
+
+  I do have neat 'type' checker for inputs, checking to see if they are a number, a valid IP address, and if the rack name is valid (exists).  It made implementing new features easier.
+
+  I defaulted into removing related virtual servers once the hardware machine is removed.  Also, whenever a new configuration is loaded, all existing servers are wiped, too.  Keep it simple.
+
+* Installation
+  I moved to using [[https://docs.pipenv.org/][=Pipenv=]] for this project, which is like a reproducible, better =pip=.  To install =pipenv=, just run `pip install pipenv` (straight from the home page).
+
+  Then in the project 4 (or zipped folder) directory, just run =pipenv install=, and it'll pick up the =Pipfile= and install my dependencies.  You'll notice that it'll install the editable (the =aggiestack= CLI), you now, afer you run =pipenv shell=, you can load the environment and run =aggiestack ...=!  
+
+  As a backup, you can default to the =aggiestack.py= to run aggiestack.  My dependencies are =click= and =python3=.
+
+* Output
+  Here's what I have for the =stdout= from running =./input-sample-1.txt= on my machine.  *NOTE*:  I get weird errors (an extra new line?) on the original file' =aggiestack add ...= line.  I just wrote the line out myself and the output was as expected.  See =./tests/fixtures/success/run/input-sample-1v2.txt=.
+
+  #+BEGIN_SRC
+ Reset server list after configuration.
+Successfully configured hardware with [hdwr-config.txt].
+Available default hardware configurations:
+Racks:
+|name|cache size|
+|----|----------|
+|r1  |40960     |
+|r2  |40960     |
+
+Machines:
+|name  |rack|ip         |mem|disk|vcpu|
+|------|----|-----------|---|----|----|
+|m1    |r1  |128.0.0.1  |16 |8   |4   |
+|m2    |r1  |128.0.0.2  |16 |32  |4   |
+|m3    |r1  |128.0.0.3  |16 |16  |4   |
+|m4    |r2  |128.0.0.4  |16 |8   |4   |
+|k1    |r2  |128.1.1.0  |32 |32  |8   |
+|k2    |r2  |128.1.0.2  |32 |32  |8   |
+|k3    |r2  |128.1.3.0  |32 |32  |8   |
+|calvin|r1  |128.129.4.4|8  |16  |1   |
+|hobbes|r1  |1.1.1.1    |16 |64  |16  |
+|dora  |r1  |1.1.1.2    |64 |256 |16  |
+Reset server list after configuration.
+Successfully configured images with [image-config.txt].
+Available base images configurations:
+|name           |size|path                         |
+|---------------|----|-----------------------------|
+|linux-ubuntu   |128 |/images/linux-ubuntu-v1.0.img|
+|linux-sles     |512 |/images/old-image.img        |
+|linux-ubuntu-16|2048|/images/linux-ubuntu-16.img  |
+Reset server list after configuration.
+Successfully configured flavors with [flavor-config.txt].
+Available base flavor configurations:
+|name  |mem|disk|vcpu|
+|------|---|----|----|
+|small |1  |1   |1   |
+|medium|8  |2   |4   |
+|large |16 |2   |4   |
+|xlarge|32 |4   |8   |
+Successfully created virtual server [my-first-instance].
+Successfully created virtual server [my-second-instance].
+Currently active virtual servers and their physical server locations (hardware).
+|name              |hardware|
+|------------------|--------|
+|my-first-instance |m1      |
+|my-second-instance|m2      |
+Sucessfully removed rack [r1].  Here are removed machines and their virtual servers.
+Successfully removed machine [m1]
+Also removed virtual servers (which depend on the machine) [my-first-instance].
+----------
+Successfully removed machine [m2]
+Also removed virtual servers (which depend on the machine) [my-second-instance].
+----------
+Successfully removed machine [m3]
+----------
+Successfully removed machine [calvin]
+----------
+Successfully removed machine [hobbes]
+----------
+Successfully removed machine [dora]
+Error: machine [newmachine] has bad rack input [r1].
+Currently active virtual servers and their physical server locations (hardware).
+NONE. 
+  #+END_SRC
+
+* Sources
+  The sources remain the same.
+
+  - The [[http://click.pocoo.org/5/][click documentation]] helped a ton.  Click is a command line interface builder in python.  This intro [[https://kushaldas.in/posts/building-command-line-tools-in-python-with-click.html][blog post]] convinced me to use it.
+  - The Python3 documentation, specifically on =pathlib= and on file handling.
+  - Vscode python, specifically using =flake8=, which is way less restrictive than =pylint=.
+  - Stackoverflow for answers from Google.
